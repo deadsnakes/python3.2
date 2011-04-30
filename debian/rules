@@ -739,8 +739,8 @@ endif
 
 ifeq ($(with_gdbm),yes)
 	: # Move GDBM files into $(p_gdbm)
-	dh_installdirs -p$(p_gdbm)
-		usr/lib/python$(VER)/dbm
+	dh_installdirs -p$(p_gdbm) \
+		usr/lib/python$(VER)/dbm \
 		usr/lib/python$(VER)/lib-dynload
 	dh_movefiles -p$(p_gdbm) --sourcedir=$(d) \
 		usr/lib/python$(VER)/lib-dynload/_gdbm.so \
