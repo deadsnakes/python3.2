@@ -1,0 +1,24 @@
+# DP: Unexpand revision numbers
+
+--- a/Include/patchlevel.h
++++ b/Include/patchlevel.h
+@@ -27,7 +27,7 @@
+ /*--end constants--*/
+ 
+ /* Subversion Revision number of this file (not of the repository) */
+-#define PY_PATCHLEVEL_REVISION  "$Revision: 88445 $"
++#define PY_PATCHLEVEL_REVISION  "$Revision$"
+ 
+ /* Version as a single 4-byte hex number, e.g. 0x010502B2 == 1.5.2b2.
+    Use this for numeric comparisons, e.g. #if PY_VERSION_HEX >= ... */
+--- a/Python/sysmodule.c
++++ b/Python/sysmodule.c
+@@ -1362,7 +1362,7 @@
+     svnversion = _Py_svnversion();
+     if (strcmp(svnversion, "Unversioned directory") != 0 && strcmp(svnversion, "exported") != 0)
+         svn_revision = svnversion;
+-    else if (istag) {
++    else if (0 && istag) {
+         len = strlen(_patchlevel_revision);
+         assert(len >= 13);
+         assert(len < (sizeof(patchlevel_revision) + 13));
