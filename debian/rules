@@ -743,7 +743,7 @@ ifeq ($(with_gdbm),yes)
 		usr/lib/python$(VER)/dbm \
 		usr/lib/python$(VER)/dbm/__pycache__ \
 		usr/lib/python$(VER)/lib-dynload
-	dh_install -p$(p_gdbm) --sourcedir=$(d) \
+	DH_COMPAT=2 dh_movefiles -p$(p_gdbm) --sourcedir=$(d) \
 		usr/lib/python$(VER)/lib-dynload/_gdbm*.so \
 		usr/lib/python$(VER)/dbm/gnu.py \
 		usr/lib/python$(VER)/dbm/__pycache__/gnu*.py*
