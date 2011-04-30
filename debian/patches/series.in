@@ -56,3 +56,5 @@ plat-gnukfreebsd.diff
 disable-sem-check.diff
 lib-argparse.diff
 no-openssl-v2.diff
+deadsnakes-fix-libffi-header-search-path.diff
+deadsnakes-fix-posix-semaphore-check.diff

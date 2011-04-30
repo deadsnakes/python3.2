@@ -1,3 +1,10 @@
+python3.2 (3.2-2~ppa1~lucid1) lucid; urgency=low
+
+  * Import from Debian Unstable.
+  * Re-enabled Tk and GDBM builds.
+
+ -- Felix Krull <f_krull@gmx.de>  Sat, 30 Apr 2011 23:07:43 +0200
+
 python3.2 (3.2-2) unstable; urgency=low
 
   * Update to 20110419 from the 3.2 branch.
