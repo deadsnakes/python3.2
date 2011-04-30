@@ -16,7 +16,7 @@ diff --git a/setup.py b/setup.py
 -        ffi_inc = [sysconfig.get_config_var("LIBFFI_INCLUDEDIR")]
 +        ffi_inc = ["/usr/include/%s" % subprocess.check_output(
 +                        "dpkg-architecture -qDEB_BUILD_GNU_TYPE",
-+                        shell=True).strip(),
++                        shell=True).strip().decode(sys.getfilesystemencoding()),
 +                   sysconfig.get_config_var("LIBFFI_INCLUDEDIR")]
          if not ffi_inc or ffi_inc[0] == '':
              ffi_inc = find_file('ffi.h', [], inc_dirs)
