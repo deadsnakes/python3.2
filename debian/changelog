@@ -1,3 +1,9 @@
+python3.2 (3.2-2~ppa1~maverick1) maverick; urgency=low
+
+  * Imported from Lucid package.
+
+ -- Felix Krull <f_krull@gmx.de>  Mon, 02 May 2011 20:54:34 +0200
+
 python3.2 (3.2-2~ppa1~lucid1) lucid; urgency=low
 
   * Import from Debian Unstable.
