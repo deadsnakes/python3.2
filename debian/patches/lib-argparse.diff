@@ -1,0 +1,18 @@
+# DP: argparse.py: Make the gettext import conditional
+
+--- a/Lib/argparse.py
++++ b/Lib/argparse.py
+@@ -89,7 +89,12 @@
+ import sys as _sys
+ import textwrap as _textwrap
+ 
+-from gettext import gettext as _, ngettext
++try:
++    from gettext import gettext
++except ImportError:
++    def gettext(message):
++        return message
++_ = gettext
+ 
+ 
+ def _callable(obj):
