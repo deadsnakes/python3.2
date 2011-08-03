@@ -1,3 +1,14 @@
+python3.2 (3.2.1-0~ppa1~lucid1) lucid; urgency=low
+
+  * Imported new upstream version 3.2.1.
+  * Added `profile` and `pstats` modules to the package.
+    - These were missing from earlier packages due to a restrictive
+      license. They were relicensed under the Apache License 2.0.
+    - Also have python3.2 provide python3.2-profiler.
+  * Removed Provides for python3.2-gdbm from python3.2 package.
+
+ -- Felix Krull <f_krull@gmx.de>  Wed, 03 Aug 2011 14:26:23 +0200
+
 python3.2 (3.2-2~ppa1~maverick1) maverick; urgency=low
 
   * Imported from Lucid package.

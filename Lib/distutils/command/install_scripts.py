@@ -5,7 +5,7 @@ Python scripts."""
 
 # contributed by Bastian Kleineidam
 
-__revision__ = "$Id: install_scripts.py 57699 2007-08-30 03:52:21Z collin.winter $"
+__revision__ = "$Id$"
 
 import os
 from distutils.core import Command

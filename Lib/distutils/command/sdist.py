@@ -2,7 +2,7 @@
 
 Implements the Distutils 'sdist' command (create a source distribution)."""
 
-__revision__ = "$Id: sdist.py 84711 2010-09-11 15:28:56Z eric.araujo $"
+__revision__ = "$Id$"
 
 import os
 import string
@@ -294,17 +294,20 @@ class sdist(Command):
                             join_lines=1, lstrip_ws=1, rstrip_ws=1,
                             collapse_join=1)
 
-        while True:
-            line = template.readline()
-            if line is None:            # end of file
-                break
+        try:
+            while True:
+                line = template.readline()
+                if line is None:            # end of file
+                    break
 
-            try:
-                self.filelist.process_template_line(line)
-            except DistutilsTemplateError as msg:
-                self.warn("%s, line %d: %s" % (template.filename,
-                                               template.current_line,
-                                               msg))
+                try:
+                    self.filelist.process_template_line(line)
+                except DistutilsTemplateError as msg:
+                    self.warn("%s, line %d: %s" % (template.filename,
+                                                   template.current_line,
+                                                   msg))
+        finally:
+            template.close()
 
     def prune_file_list(self):
         """Prune off branches that might slip into the file list as created
