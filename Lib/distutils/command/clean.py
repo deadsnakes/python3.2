@@ -4,7 +4,7 @@ Implements the Distutils 'clean' command."""
 
 # contributed by Bastian Kleineidam <calvin@cs.uni-sb.de>, added 2000-03-18
 
-__revision__ = "$Id: clean.py 57699 2007-08-30 03:52:21Z collin.winter $"
+__revision__ = "$Id$"
 
 import os
 from distutils.core import Command

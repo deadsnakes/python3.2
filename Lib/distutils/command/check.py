@@ -2,7 +2,7 @@
 
 Implements the Distutils 'check' command.
 """
-__revision__ = "$Id: check.py 85197 2010-10-03 14:18:09Z tarek.ziade $"
+__revision__ = "$Id$"
 
 from distutils.core import Command
 from distutils.errors import DistutilsSetupError

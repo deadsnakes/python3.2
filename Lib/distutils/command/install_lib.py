@@ -3,7 +3,7 @@
 Implements the Distutils 'install_lib' command
 (install all Python modules)."""
 
-__revision__ = "$Id: install_lib.py 75704 2009-10-25 23:08:47Z tarek.ziade $"
+__revision__ = "$Id$"
 
 import os
 import sys

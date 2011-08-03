@@ -3,7 +3,7 @@
 Implements the Distutils 'bdist' command (create a built [binary]
 distribution)."""
 
-__revision__ = "$Id: bdist.py 83053 2010-07-22 12:50:05Z tarek.ziade $"
+__revision__ = "$Id$"
 
 import os
 from distutils.core import Command

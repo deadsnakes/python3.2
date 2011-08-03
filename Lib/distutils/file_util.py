@@ -3,7 +3,7 @@
 Utility functions for operating on single files.
 """
 
-__revision__ = "$Id: file_util.py 86248 2010-11-06 06:00:54Z eric.araujo $"
+__revision__ = "$Id$"
 
 import os
 from distutils.errors import DistutilsFileError
