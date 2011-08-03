@@ -1,3 +1,12 @@
+python3.2 (3.2.1-0~ppa1~lucid1) lucid; urgency=low
+
+  * Imported new upstream version 3.2.1.
+  * Added `profile` and `pstats` modules to the package.
+    - These were missing from earlier packages due to a restrictive
+      license. They were relicensed under the Apache License 2.0.
+
+ -- Felix Krull <f_krull@gmx.de>  Wed, 03 Aug 2011 12:32:26 +0200
+
 python3.2 (3.2-2~ppa1~lucid1) lucid; urgency=low
 
   * Import from Debian Unstable.
