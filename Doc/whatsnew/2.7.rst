@@ -11,7 +11,7 @@
 .. T_STRING_INPLACE not described in main docs
 .. "Format String Syntax" in string.rst could use many more examples.
 
-.. $Id: 2.7.rst 86794 2010-11-26 11:50:13Z georg.brandl $
+.. $Id$
    Rules for maintenance:
 
    * Anyone can add text to this document.  Do not spend very much time
