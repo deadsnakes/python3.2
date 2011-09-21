@@ -126,7 +126,7 @@ This module provides the following class:
 
 It also provides the following decorators:
 
-.. decorator:: abstractmethod(function)
+.. function:: abstractmethod(function)
 
    A decorator indicating abstract methods.
 
