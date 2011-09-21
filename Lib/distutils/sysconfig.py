@@ -120,7 +120,6 @@ def get_python_lib(plat_specific=0, standard_lib=0, prefix=None):
     If 'prefix' is supplied, use it instead of sys.prefix or
     sys.exec_prefix -- i.e., ignore 'plat_specific'.
     """
-    is_default_prefix = not prefix or os.path.normpath(prefix) in ('/usr', '/usr/local')
     if prefix is None:
         prefix = plat_specific and EXEC_PREFIX or PREFIX
 
@@ -129,8 +128,6 @@ def get_python_lib(plat_specific=0, standard_lib=0, prefix=None):
                                  "lib", "python" + get_python_version())
         if standard_lib:
             return libpython
-        elif is_default_prefix and 'PYTHONUSERBASE' not in os.environ and 'real_prefix' not in sys.__dict__:
-            return os.path.join(prefix, "lib", "python3", "dist-packages")
         else:
             return os.path.join(libpython, "site-packages")
     elif os.name == "nt":
