@@ -32,4 +32,3 @@ link-system-expat.diff
 plat-gnukfreebsd.diff
 disable-sem-check.diff
 lib-argparse.diff
-deadsnakes-fix-libffi-header-search-path.diff
