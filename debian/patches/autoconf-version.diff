@@ -15,4 +15,4 @@
 -])
  AC_PREREQ(2.65)
  
- AC_REVISION($Revision: 88440 $)
+ AC_REVISION($Revision$)

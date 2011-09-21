@@ -6,12 +6,18 @@
 
 This will append site-specific paths to the module search path.  On
 Unix (including Mac OSX), it starts with sys.prefix and
-sys.exec_prefix (if different) and appends
-lib/python<version>/site-packages as well as lib/site-python.
+sys.exec_prefix (if different) and appends lib/python3/dist-packages,
+lib/python<version>/dist-packages as well as lib/site-python.
 On other platforms (such as Windows), it tries each of the
 prefixes directly, as well as with lib/site-packages appended.  The
 resulting directories, if they exist, are appended to sys.path, and
 also inspected for path configuration files.
+
+For Debian and derivatives, this sys.path is augmented with directories
+for packages distributed within the distribution. Local addons go
+into /usr/local/lib/python<version>/dist-packages, Debian addons
+install into /usr/lib/python3/dist-packages.
+/usr/lib/python<version>/site-packages is not used.
 
 A path configuration file is a file whose name has the form
 <package>.pth; its contents are additional directories (one per line)
@@ -264,6 +270,13 @@ def addusersitepackages(known_paths):
 
     if ENABLE_USER_SITE and os.path.isdir(user_site):
         addsitedir(user_site, known_paths)
+    if ENABLE_USER_SITE:
+        for dist_libdir in ("lib", "local/lib"):
+            user_site = os.path.join(USER_BASE, dist_libdir,
+                                     "python" + sys.version[:3],
+                                     "dist-packages")
+            if os.path.isdir(user_site):
+                addsitedir(user_site, known_paths)
     return known_paths
 
 def getsitepackages():
@@ -285,10 +298,17 @@ def getsitepackages():
         if sys.platform in ('os2emx', 'riscos'):
             sitepackages.append(os.path.join(prefix, "Lib", "site-packages"))
         elif os.sep == '/':
+            sitepackages.append(os.path.join(prefix, "local/lib",
+                                        "python" + sys.version[:3],
+                                        "dist-packages"))
+            sitepackages.append(os.path.join(prefix, "lib",
+                                        "python3",
+                                        "dist-packages"))
+            # this one is deprecated for Debian
             sitepackages.append(os.path.join(prefix, "lib",
                                         "python" + sys.version[:3],
-                                        "site-packages"))
-            sitepackages.append(os.path.join(prefix, "lib", "site-python"))
+                                        "dist-packages"))
+            sitepackages.append(os.path.join(prefix, "lib", "dist-python"))
         else:
             sitepackages.append(prefix)
             sitepackages.append(os.path.join(prefix, "lib", "site-packages"))

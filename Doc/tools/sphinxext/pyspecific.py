@@ -84,32 +84,6 @@ class ImplementationDetail(Directive):
         return [pnode]
 
 
-# Support for documenting decorators
-
-from sphinx import addnodes
-from sphinx.domains.python import PyModulelevel, PyClassmember
-
-class PyDecoratorMixin(object):
-    def handle_signature(self, sig, signode):
-        ret = super(PyDecoratorMixin, self).handle_signature(sig, signode)
-        signode.insert(0, addnodes.desc_addname('@', '@'))
-        return ret
-
-    def needs_arglist(self):
-        return False
-
-class PyDecoratorFunction(PyDecoratorMixin, PyModulelevel):
-    def run(self):
-        # a decorator function is a function after all
-        self.name = 'py:function'
-        return PyModulelevel.run(self)
-
-class PyDecoratorMethod(PyDecoratorMixin, PyClassmember):
-    def run(self):
-        self.name = 'py:method'
-        return PyClassmember.run(self)
-
-
 # Support for documenting version of removal in deprecations
 
 from sphinx.locale import versionlabels
@@ -171,8 +145,15 @@ from pprint import pformat
 from docutils.io import StringOutput
 from docutils.utils import new_document
 
-from sphinx.builders import Builder
-from sphinx.writers.text import TextWriter
+try:
+    from sphinx.builders import Builder
+except ImportError:
+    from sphinx.builder import Builder
+
+try:
+    from sphinx.writers.text import TextWriter
+except ImportError:
+    from sphinx.textwriter import TextWriter
 
 
 class PydocTopicsBuilder(Builder):
@@ -220,6 +201,7 @@ import suspicious
 # Support for documenting Opcodes
 
 import re
+from sphinx import addnodes
 
 opcode_sig_re = re.compile(r'(\w+(?:\+\d)?)(?:\s*\((.*)\))?')
 
@@ -273,5 +255,3 @@ def setup(app):
     app.add_description_unit('pdbcommand', 'pdbcmd', '%s (pdb command)',
                              parse_pdb_command)
     app.add_description_unit('2to3fixer', '2to3fixer', '%s (2to3 fixer)')
-    app.add_directive_to_domain('py', 'decorator', PyDecoratorFunction)
-    app.add_directive_to_domain('py', 'decoratormethod', PyDecoratorMethod)
