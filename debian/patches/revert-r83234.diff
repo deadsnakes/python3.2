@@ -174,7 +174,7 @@
     wrapped=wrapped, assigned=assigned, updated=updated)`` as a function decorator
 --- a/Doc/documenting/markup.rst
 +++ b/Doc/documenting/markup.rst
-@@ -177,37 +177,6 @@
+@@ -178,37 +178,6 @@
     are modified), side effects, and possible exceptions.  A small example may be
     provided.
  
@@ -212,9 +212,9 @@
  .. describe:: class
  
     Describes a class.  The signature can include parentheses with parameters
-@@ -225,12 +194,6 @@
-    parameter.  The description should include similar information to that
-    described for ``function``.
+@@ -243,12 +212,6 @@
+    described for ``function``.  This directive should be nested in a class
+    directive, like in the example above.
  
 -.. describe:: decoratormethod
 -
