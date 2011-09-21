@@ -548,7 +548,7 @@ endif
 clean: control-file
 	dh_testdir
 	dh_testroot
-	rm -rf stamps .pc
+	rm -rf stamps
 	rm -f debian/test_results
 
 	$(MAKE) -C Doc clean
