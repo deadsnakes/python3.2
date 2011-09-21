@@ -1,3 +1,9 @@
+python3.2 (3.2.2-0~ppa1~lucid1) lucid; urgency=low
+
+  * Imported new upstream version Python 3.2.2.
+
+ -- Felix Krull <f_krull@gmx.de>  Wed, 21 Sep 2011 23:37:10 +0200
+
 python3.2 (3.2.1-0~ppa1~lucid1) lucid; urgency=low
 
   * Imported new upstream version 3.2.1.
