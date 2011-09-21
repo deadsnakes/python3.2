@@ -91,11 +91,11 @@
 +__flexarr = [1]
 +def __ASMNAME(cname): return __ASMNAME2 (__USER_LABEL_PREFIX__, cname)
 +
-+def __attribute__(xyz): return  
++def __attribute__(xyz): return
 +
 +def __attribute_format_arg__(x): return __attribute__ ((__format_arg__ (x)))
 +
-+def __attribute_format_arg__(x): return  
++def __attribute_format_arg__(x): return
 +
 +
 +# Included from bits/wordsize.h
@@ -212,11 +212,11 @@
 +__flexarr = [1]
 +def __ASMNAME(cname): return __ASMNAME2 (__USER_LABEL_PREFIX__, cname)
 +
-+def __attribute__(xyz): return  
++def __attribute__(xyz): return
 +
 +def __attribute_format_arg__(x): return __attribute__ ((__format_arg__ (x)))
 +
-+def __attribute_format_arg__(x): return  
++def __attribute_format_arg__(x): return
 +
 +
 +# Included from bits/wordsize.h
@@ -1024,11 +1024,11 @@
 +__flexarr = [1]
 +def __ASMNAME(cname): return __ASMNAME2 (__USER_LABEL_PREFIX__, cname)
 +
-+def __attribute__(xyz): return  
++def __attribute__(xyz): return
 +
 +def __attribute_format_arg__(x): return __attribute__ ((__format_arg__ (x)))
 +
-+def __attribute_format_arg__(x): return  
++def __attribute_format_arg__(x): return
 +
 +
 +# Included from bits/wordsize.h
@@ -1330,11 +1330,11 @@
 +__flexarr = [1]
 +def __ASMNAME(cname): return __ASMNAME2 (__USER_LABEL_PREFIX__, cname)
 +
-+def __attribute__(xyz): return  
++def __attribute__(xyz): return
 +
 +def __attribute_format_arg__(x): return __attribute__ ((__format_arg__ (x)))
 +
-+def __attribute_format_arg__(x): return  
++def __attribute_format_arg__(x): return
 +
 +
 +# Included from bits/wordsize.h
@@ -1451,11 +1451,11 @@
 +__flexarr = [1]
 +def __ASMNAME(cname): return __ASMNAME2 (__USER_LABEL_PREFIX__, cname)
 +
-+def __attribute__(xyz): return  
++def __attribute__(xyz): return
 +
 +def __attribute_format_arg__(x): return __attribute__ ((__format_arg__ (x)))
 +
-+def __attribute_format_arg__(x): return  
++def __attribute_format_arg__(x): return
 +
 +
 +# Included from bits/wordsize.h
@@ -2263,11 +2263,11 @@
 +__flexarr = [1]
 +def __ASMNAME(cname): return __ASMNAME2 (__USER_LABEL_PREFIX__, cname)
 +
-+def __attribute__(xyz): return  
++def __attribute__(xyz): return
 +
 +def __attribute_format_arg__(x): return __attribute__ ((__format_arg__ (x)))
 +
-+def __attribute_format_arg__(x): return  
++def __attribute_format_arg__(x): return
 +
 +
 +# Included from bits/wordsize.h
