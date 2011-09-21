@@ -240,7 +240,7 @@ ifeq ($(with_fpectl),yes)
 endif
 
 stamps/stamp-configure-shared: stamps/stamp-configure
-	rm -rf $(buildd_shared)
+	rm -rf $(buildd_shared) stamps/stamp-build-shared
 	mkdir -p $(buildd_shared)
 	cd $(buildd_shared) && \
 	  CC="$(CC)" $(OPTSETTINGS) \
@@ -262,7 +262,8 @@ stamps/stamp-configure-shared: stamps/stamp-configure
 	touch stamps/stamp-configure-shared
 
 stamps/stamp-configure-static: stamps/stamp-configure
-	rm -rf $(buildd_static)
+	rm -rf $(buildd_static) stamps/stamp-build-static stamps/stamp-mincheck \
+	  stamps/stamp-check stamps/stamp-pystone stamps/stamp-pybench
 	mkdir -p $(buildd_static)
 	cd $(buildd_static) && \
 	  CC="$(CC)" $(OPTSETTINGS) \
@@ -286,7 +287,7 @@ stamps/stamp-configure-static: stamps/stamp-configure
 	touch stamps/stamp-configure-static
 
 stamps/stamp-configure-debug: stamps/stamp-configure
-	rm -rf $(buildd_debug)
+	rm -rf $(buildd_debug) stamps/stamp-build-debug
 	mkdir -p $(buildd_debug)
 	cd $(buildd_debug) && \
 	  CC="$(CC)" $(OPTDEBUGSETTINGS) CFLAGS="" CXXFLAGS="" \
@@ -311,7 +312,7 @@ stamps/stamp-configure-debug: stamps/stamp-configure
 	touch stamps/stamp-configure-debug
 
 stamps/stamp-configure-shared-debug: stamps/stamp-configure
-	rm -rf $(buildd_shdebug)
+	rm -rf $(buildd_shdebug) stamps/stamp-build-shared-debug
 	mkdir -p $(buildd_shdebug)
 	cd $(buildd_shdebug) && \
 	  CC="$(CC)" $(OPTDEBUGSETTINGS) CFLAGS="" CXXFLAGS="" \
