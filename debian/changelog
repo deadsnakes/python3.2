@@ -1,8 +1,8 @@
-python3.2 (3.2.2-0~ppa1~maverick) maverick; urgency=low
+python3.2 (3.2.2-0~ppa1~maverick1) maverick; urgency=low
 
   * Imported from Lucid package.
 
- -- Felix Krull <f_krull@gmx.de>  Thu, 22 Sep 2011 00:18:45 +0200
+ -- Felix Krull <f_krull@gmx.de>  Sat, 24 Sep 2011 01:39:54 +0200
 
 python3.2 (3.2.2-0~ppa1~lucid1) lucid; urgency=low
 
