@@ -29,3 +29,4 @@ link-system-expat.diff
 plat-gnukfreebsd.diff
 disable-sem-check.diff
 lib-argparse.diff
+deadsnakes-ncursesw-include-dir.diff
