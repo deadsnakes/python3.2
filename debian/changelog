@@ -1,3 +1,9 @@
+python3.2 (3.2.2-1+maverick1) maverick; urgency=low
+
+  * Imported from Lucid package.
+
+ -- Felix Krull <f_krull@gmx.de>  Sat, 28 Jan 2012 22:47:05 +0100
+
 python3.2 (3.2.2-1+lucid1) lucid; urgency=low
 
   * New version numbering scheme.
