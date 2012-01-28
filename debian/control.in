@@ -173,7 +173,7 @@ Depends:
  @PVER@-tk-dbg (>= ${binary:Version}),
  @PVER@-gdbm-dbg (>= ${binary:Version}),
  ${shlibs:Depends}, ${misc:Depends}
-Suggests: python3-distribute-deadsnakes
+Suggests: python3-setuptools
 XB-Python-Version: @VER@
 Description: An interactive high-level object-oriented language (version @VER@)
  Version @VER@ of the high-level, interactive object oriented language,

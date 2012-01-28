@@ -173,7 +173,7 @@ Depends:
  python3.2-tk-dbg (>= ${binary:Version}),
  python3.2-gdbm-dbg (>= ${binary:Version}),
  ${shlibs:Depends}, ${misc:Depends}
-Suggests: python3-distribute-deadsnakes
+Suggests: python3-setuptools
 XB-Python-Version: 3.2
 Description: An interactive high-level object-oriented language (version 3.2)
  Version 3.2 of the high-level, interactive object oriented language,
