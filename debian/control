@@ -155,3 +155,31 @@ Description: GNU dbm database support for Python (v3.2 debug extension)
  .
  This package contains the extensions built for the python debug interpreter.
 
+
+Package: python3.2-complete
+Architecture: all
+Priority: optional
+Depends:
+ python3.2 (>= ${binary:Version}),
+ python3.2-minimal (>= ${binary:Version}),
+ libpython3.2 (>= ${binary:Version}),
+ python3.2-examples (>= ${binary:Version}),
+ python3.2-dev (>= ${binary:Version}),
+ idle-python3.2 (>= ${binary:Version}),
+ python3.2-doc (>= ${binary:Version}),
+ python3.2-dbg (>= ${binary:Version}),
+ python3.2-tk (>= ${binary:Version}),
+ python3.2-gdbm (>= ${binary:Version}),
+ python3.2-tk-dbg (>= ${binary:Version}),
+ python3.2-gdbm-dbg (>= ${binary:Version}),
+ ${shlibs:Depends}, ${misc:Depends}
+Suggests: python3-distribute-deadsnakes
+XB-Python-Version: 3.2
+Description: An interactive high-level object-oriented language (version 3.2)
+ Version 3.2 of the high-level, interactive object oriented language,
+ includes an extensive class library with lots of goodies for
+ network programming, system administration, sounds and graphics.
+ .
+ This package depends on all individual packages that were generated from the
+ python3.2 source package.
+
