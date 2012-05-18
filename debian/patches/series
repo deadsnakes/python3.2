@@ -26,8 +26,6 @@ statvfs-f_flag-constants.diff
 langpack-gettext.diff
 
 issue9012a.diff
-revert-r83234.diff
-revert-r83274.diff
 link-system-expat.diff
 plat-gnukfreebsd.diff
 disable-sem-check.diff

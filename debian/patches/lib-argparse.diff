@@ -15,4 +15,4 @@
 +_ = gettext
  
  
- def _callable(obj):
+ SUPPRESS = '==SUPPRESS=='
