@@ -57,9 +57,15 @@ instantiated directly, but always through the module-level function
 
 .. attribute:: Logger.propagate
 
-   If this evaluates to false, logging messages are not passed by this logger or by
-   its child loggers to the handlers of higher level (ancestor) loggers. The
-   constructor sets this attribute to 1.
+   If this evaluates to true, logging messages are passed by this logger and by
+   its child loggers to the handlers of higher level (ancestor) loggers.
+   Messages are passed directly to the ancestor loggers' handlers - neither the
+   level nor filters of the ancestor loggers in question are considered.
+
+   If this evaluates to false, logging messages are not passed to the handlers
+   of ancestor loggers.
+
+   The constructor sets this attribute to ``True``.
 
 
 .. method:: Logger.setLevel(lvl)
@@ -80,6 +86,11 @@ instantiated directly, but always through the module-level function
 
    If the root is reached, and it has a level of NOTSET, then all messages will be
    processed. Otherwise, the root's level will be used as the effective level.
+
+   .. versionchanged:: 3.2
+      The *lvl* parameter now accepts a string representation of the
+      level such as 'INFO' as an alternative to the integer constants
+      such as :const:`INFO`.
 
 
 .. method:: Logger.isEnabledFor(lvl)
@@ -137,7 +148,7 @@ instantiated directly, but always through the module-level function
 
        Stack (most recent call last):
 
-   This mimics the `Traceback (most recent call last):` which is used when
+   This mimics the ``Traceback (most recent call last):`` which is used when
    displaying exception frames.
 
    The third keyword argument is *extra* which can be used to pass a
@@ -313,6 +324,11 @@ subclasses. However, the :meth:`__init__` method in subclasses needs to call
    severe than *lvl* will be ignored. When a handler is created, the level is set
    to :const:`NOTSET` (which causes all messages to be processed).
 
+   .. versionchanged:: 3.2
+      The *lvl* parameter now accepts a string representation of the
+      level such as 'INFO' as an alternative to the integer constants
+      such as :const:`INFO`.
+
 
 .. method:: Handler.setFormatter(form)
 
@@ -359,12 +375,14 @@ subclasses. However, the :meth:`__init__` method in subclasses needs to call
 .. method:: Handler.handleError(record)
 
    This method should be called from handlers when an exception is encountered
-   during an :meth:`emit` call. By default it does nothing, which means that
-   exceptions get silently ignored. This is what is mostly wanted for a logging
-   system - most users will not care about errors in the logging system, they are
-   more interested in application errors. You could, however, replace this with a
-   custom handler if you wish. The specified record is the one which was being
-   processed when the exception occurred.
+   during an :meth:`emit` call. If the module-level attribute
+   ``raiseExceptions`` is ``False``, exceptions get silently ignored. This is
+   what is mostly wanted for a logging system - most users will not care about
+   errors in the logging system, they are more interested in application
+   errors. You could, however, replace this with a custom handler if you wish.
+   The specified record is the one which was being processed when the exception
+   occurred. (The default value of ``raiseExceptions`` is ``True``, as that is
+   more useful during development).
 
 
 .. method:: Handler.format(record)
@@ -820,7 +838,7 @@ functions.
 
        Stack (most recent call last):
 
-   This mimics the `Traceback (most recent call last):` which is used when
+   This mimics the ``Traceback (most recent call last):`` which is used when
    displaying exception frames.
 
    The third optional keyword argument is *extra* which can be used to pass a
@@ -1059,11 +1077,11 @@ with the :mod:`warnings` module.
    If *capture* is ``True``, warnings issued by the :mod:`warnings` module will
    be redirected to the logging system. Specifically, a warning will be
    formatted using :func:`warnings.formatwarning` and the resulting string
-   logged to a logger named 'py.warnings' with a severity of `WARNING`.
+   logged to a logger named ``'py.warnings'`` with a severity of ``'WARNING'``.
 
    If *capture* is ``False``, the redirection of warnings to the logging system
    will stop, and warnings will be redirected to their original destinations
-   (i.e. those in effect before `captureWarnings(True)` was called).
+   (i.e. those in effect before ``captureWarnings(True)`` was called).
 
 
 .. seealso::

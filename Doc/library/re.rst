@@ -80,7 +80,7 @@ Some characters, like ``'|'`` or ``'('``, are special. Special
 characters either stand for classes of ordinary characters, or affect
 how the regular expressions around them are interpreted. Regular
 expression pattern strings may not contain null bytes, but can specify
-the null byte using the ``\number`` notation, e.g., ``'\x00'``.
+the null byte using a ``\number`` notation such as ``'\x00'``.
 
 
 The special characters are:
@@ -161,30 +161,36 @@ The special characters are:
    raw strings for all but the simplest expressions.
 
 ``[]``
-   Used to indicate a set of characters.  Characters can be listed individually, or
-   a range of characters can be indicated by giving two characters and separating
-   them by a ``'-'``.  Special characters are not active inside sets.  For example,
-   ``[akm$]`` will match any of the characters ``'a'``, ``'k'``,
-   ``'m'``, or ``'$'``; ``[a-z]`` will match any lowercase letter, and
-   ``[a-zA-Z0-9]`` matches any letter or digit.  Character classes such
-   as ``\w`` or ``\S`` (defined below) are also acceptable inside a
-   range, although the characters they match depends on whether
-   :const:`ASCII` or  :const:`LOCALE` mode is in force.  If you want to
-   include a ``']'`` or a ``'-'`` inside a set, precede it with a
-   backslash, or place it as the first character.  The pattern ``[]]``
-   will match ``']'``, for example.
+   Used to indicate a set of characters.  In a set:
 
-   You can match the characters not within a range by :dfn:`complementing` the set.
-   This is indicated by including a ``'^'`` as the first character of the set;
-   ``'^'`` elsewhere will simply match the ``'^'`` character.  For example,
-   ``[^5]`` will match any character except ``'5'``, and ``[^^]`` will match any
-   character except ``'^'``.
+   * Characters can be listed individually, e.g. ``[amk]`` will match ``'a'``,
+     ``'m'``, or ``'k'``.
 
-   Note that inside ``[]`` the special forms and special characters lose
-   their meanings and only the syntaxes described here are valid. For
-   example, ``+``, ``*``, ``(``, ``)``, and so on are treated as
-   literals inside ``[]``, and backreferences cannot be used inside
-   ``[]``.
+   * Ranges of characters can be indicated by giving two characters and separating
+     them by a ``'-'``, for example ``[a-z]`` will match any lowercase ASCII letter,
+     ``[0-5][0-9]`` will match all the two-digits numbers from ``00`` to ``59``, and
+     ``[0-9A-Fa-f]`` will match any hexadecimal digit.  If ``-`` is escaped (e.g.
+     ``[a\-z]``) or if it's placed as the first or last character (e.g. ``[a-]``),
+     it will match a literal ``'-'``.
+
+   * Special characters lose their special meaning inside sets.  For example,
+     ``[(+*)]`` will match any of the literal characters ``'('``, ``'+'``,
+     ``'*'``, or ``')'``.
+
+   * Character classes such as ``\w`` or ``\S`` (defined below) are also accepted
+     inside a set, although the characters they match depends on whether
+     :const:`ASCII` or :const:`LOCALE` mode is in force.
+
+   * Characters that are not within a range can be matched by :dfn:`complementing`
+     the set.  If the first character of the set is ``'^'``, all the characters
+     that are *not* in the set will be matched.  For example, ``[^5]`` will match
+     any character except ``'5'``, and ``[^^]`` will match any character except
+     ``'^'``.  ``^`` has no special meaning if it's not the first character in
+     the set.
+
+   * To match a literal ``']'`` inside a set, precede it with a backslash, or
+     place it at the beginning of the set.  For example, both ``[()[\]{}]`` and
+     ``[]()[{}]`` will both match a parenthesis.
 
 ``'|'``
    ``A|B``, where A and B can be arbitrary REs, creates a regular expression that
@@ -405,7 +411,7 @@ accepted by the regular expression parser::
    \r      \t      \v      \x
    \\
 
-Octal escapes are included in a limited form: If the first digit is a 0, or if
+Octal escapes are included in a limited form.  If the first digit is a 0, or if
 there are three octal digits, it is considered an octal escape. Otherwise, it is
 a group reference.  As for string literals, octal escapes are always at most
 three digits in length.
@@ -413,8 +419,8 @@ three digits in length.
 
 .. _matching-searching:
 
-Matching vs Searching
----------------------
+Matching vs. Searching
+----------------------
 
 .. sectionauthor:: Fred L. Drake, Jr. <fdrake@acm.org>
 
@@ -490,6 +496,11 @@ form.
    counterpart ``(?u)``), but these are redundant in Python 3 since
    matches are Unicode by default for strings (and Unicode matching
    isn't allowed for bytes).
+
+
+.. data:: DEBUG
+
+   Display debug information about compiled expression.
 
 
 .. data:: I
@@ -595,8 +606,7 @@ form.
       ['', '...', 'words', ', ', 'words', '...', '']
 
    That way, separator components are always found at the same relative
-   indices within the result list (e.g., if there's one capturing group
-   in the separator, the 0th, the 2nd and so forth).
+   indices within the result list.
 
    Note that *split* will never split a string on an empty pattern match.
    For example:
@@ -713,7 +723,7 @@ Regular Expression Objects
 --------------------------
 
 Compiled regular expression objects support the following methods and
-attributes.
+attributes:
 
 .. method:: regex.search(string[, pos[, endpos]])
 
@@ -732,7 +742,7 @@ attributes.
    The optional parameter *endpos* limits how far the string will be searched; it
    will be as if the string is *endpos* characters long, so only the characters
    from *pos* to ``endpos - 1`` will be searched for a match.  If *endpos* is less
-   than *pos*, no match will be found, otherwise, if *rx* is a compiled regular
+   than *pos*, no match will be found; otherwise, if *rx* is a compiled regular
    expression object, ``rx.search(string, 0, 50)`` is equivalent to
    ``rx.search(string[:50], 0)``.
 
@@ -820,8 +830,8 @@ attributes.
 Match Objects
 -------------
 
-Match objects always have a boolean value of :const:`True`, so that you can test
-whether e.g. :func:`match` resulted in a match with a simple if statement.  They
+Match objects always have a boolean value of :const:`True`.  This lets you
+use a simple if-statement to test whether a match was found.  Match objects
 support the following methods and attributes:
 
 
@@ -998,7 +1008,7 @@ Regular Expression Examples
 ---------------------------
 
 
-Checking For a Pair
+Checking for a Pair
 ^^^^^^^^^^^^^^^^^^^
 
 In this example, we'll use the following helper function to display match
@@ -1013,16 +1023,16 @@ objects a little more gracefully:
 
 Suppose you are writing a poker program where a player's hand is represented as
 a 5-character string with each character representing a card, "a" for ace, "k"
-for king, "q" for queen, j for jack, "0" for 10, and "1" through "9"
+for king, "q" for queen, "j" for jack, "t" for 10, and "2" through "9"
 representing the card with that value.
 
 To see if a given string is a valid hand, one could do the following:
 
-   >>> valid = re.compile(r"[0-9akqj]{5}$")
-   >>> displaymatch(valid.match("ak05q"))  # Valid.
-   "<Match: 'ak05q', groups=()>"
-   >>> displaymatch(valid.match("ak05e"))  # Invalid.
-   >>> displaymatch(valid.match("ak0"))    # Invalid.
+   >>> valid = re.compile(r"^[a2-9tjqk]{5}$")
+   >>> displaymatch(valid.match("akt5q"))  # Valid.
+   "<Match: 'akt5q', groups=()>"
+   >>> displaymatch(valid.match("akt5e"))  # Invalid.
+   >>> displaymatch(valid.match("akt"))    # Invalid.
    >>> displaymatch(valid.match("727ak"))  # Valid.
    "<Match: '727ak', groups=()>"
 
@@ -1106,7 +1116,7 @@ Avoiding recursion
 
 If you create regular expressions that require the engine to perform a lot of
 recursion, you may encounter a :exc:`RuntimeError` exception with the message
-``maximum recursion limit`` exceeded. For example, ::
+``maximum recursion limit exceeded``. For example, ::
 
    >>> s = 'Begin ' + 1000*'a very long string ' + 'end'
    >>> re.match('Begin (\w| )*? end', s).end()

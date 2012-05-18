@@ -293,7 +293,7 @@ used from the command line. The basic command-line usage is::
 
    As a shortcut, ``python -m unittest`` is the equivalent of
    ``python -m unittest discover``. If you want to pass arguments to test
-   discovery the `discover` sub-command must be used explicitly.
+   discovery the ``discover`` sub-command must be used explicitly.
 
 The ``discover`` sub-command has the following options:
 
@@ -305,11 +305,11 @@ The ``discover`` sub-command has the following options:
 
 .. cmdoption:: -s directory
 
-   Directory to start discovery ('.' default)
+   Directory to start discovery (``.`` default)
 
 .. cmdoption:: -p pattern
 
-   Pattern to match test files ('test*.py' default)
+   Pattern to match test files (``test*.py`` default)
 
 .. cmdoption:: -t directory
 
@@ -376,7 +376,7 @@ The simplest :class:`TestCase` subclass will simply override the
            widget = Widget('The widget')
            self.assertEqual(widget.size(), (50, 50), 'incorrect default size')
 
-Note that in order to test something, we use the one of the :meth:`assert\*`
+Note that in order to test something, we use one of the :meth:`assert\*`
 methods provided by the :class:`TestCase` base class.  If the test fails, an
 exception will be raised, and :mod:`unittest` will identify the test case as a
 :dfn:`failure`.  Any other exceptions will be treated as :dfn:`errors`. This
@@ -725,7 +725,7 @@ Test cases
 
    .. versionchanged:: 3.2
       :class:`TestCase` can be instantiated successfully without providing a method
-      name. This makes it easier to experiment with `TestCase` from the
+      name. This makes it easier to experiment with :class:`TestCase` from the
       interactive interpreter.
 
    *methodName* defaults to :meth:`runTest`.
@@ -869,13 +869,13 @@ Test cases
 
       In addition, if *first* and *second* are the exact same type and one of
       list, tuple, dict, set, frozenset or str or any type that a subclass
-      registers with :meth:`addTypeEqualityFunc` the type specific equality
+      registers with :meth:`addTypeEqualityFunc` the type-specific equality
       function will be called in order to generate a more useful default
       error message (see also the :ref:`list of type-specific methods
       <type-specific-methods>`).
 
       .. versionchanged:: 3.1
-         Added the automatic calling of type specific equality function.
+         Added the automatic calling of type-specific equality function.
 
       .. versionchanged:: 3.2
          :meth:`assertMultiLineEqual` added as the default type equality
@@ -929,6 +929,7 @@ Test cases
 
       Test that *obj* is (or is not) an instance of *cls* (which can be a
       class or a tuple of classes, as supported by :func:`isinstance`).
+      To check for the exact type, use :func:`assertIs(type(obj), cls) <assertIs>`.
 
       .. versionadded:: 3.2
 
@@ -940,17 +941,17 @@ Test cases
    +---------------------------------------------------------+--------------------------------------+------------+
    | Method                                                  | Checks that                          | New in     |
    +=========================================================+======================================+============+
-   | :meth:`assertRaises(exc, fun, *args, **kwds)            | ``fun(*args, **kwds)`` raises `exc`  |            |
+   | :meth:`assertRaises(exc, fun, *args, **kwds)            | ``fun(*args, **kwds)`` raises *exc*  |            |
    | <TestCase.assertRaises>`                                |                                      |            |
    +---------------------------------------------------------+--------------------------------------+------------+
-   | :meth:`assertRaisesRegex(exc, re, fun, *args, **kwds)   | ``fun(*args, **kwds)`` raises `exc`  | 3.1        |
-   | <TestCase.assertRaisesRegex>`                           | and the message matches `re`         |            |
+   | :meth:`assertRaisesRegex(exc, re, fun, *args, **kwds)   | ``fun(*args, **kwds)`` raises *exc*  | 3.1        |
+   | <TestCase.assertRaisesRegex>`                           | and the message matches *re*         |            |
    +---------------------------------------------------------+--------------------------------------+------------+
-   | :meth:`assertWarns(warn, fun, *args, **kwds)            | ``fun(*args, **kwds)`` raises `warn` | 3.2        |
+   | :meth:`assertWarns(warn, fun, *args, **kwds)            | ``fun(*args, **kwds)`` raises *warn* | 3.2        |
    | <TestCase.assertWarns>`                                 |                                      |            |
    +---------------------------------------------------------+--------------------------------------+------------+
-   | :meth:`assertWarnsRegex(warn, re, fun, *args, **kwds)   | ``fun(*args, **kwds)`` raises `warn` | 3.2        |
-   | <TestCase.assertWarnsRegex>`                            | and the message matches `re`         |            |
+   | :meth:`assertWarnsRegex(warn, re, fun, *args, **kwds)   | ``fun(*args, **kwds)`` raises *warn* | 3.2        |
+   | <TestCase.assertWarnsRegex>`                            | and the message matches *re*         |            |
    +---------------------------------------------------------+--------------------------------------+------------+
 
    .. method:: assertRaises(exception, callable, *args, **kwds)
@@ -1092,7 +1093,7 @@ Test cases
    | :meth:`assertNotRegex(s, re)          | ``not regex.search(s)``        | 3.2          |
    | <TestCase.assertNotRegex>`            |                                |              |
    +---------------------------------------+--------------------------------+--------------+
-   | :meth:`assertCountEqual(a, b)         | `a` and `b` have the same      | 3.2          |
+   | :meth:`assertCountEqual(a, b)         | *a* and *b* have the same      | 3.2          |
    | <TestCase.assertCountEqual>`          | elements in the same number,   |              |
    |                                       | regardless of their order      |              |
    +---------------------------------------+--------------------------------+--------------+
@@ -1887,7 +1888,7 @@ Loading and running tests
 .. class:: TextTestRunner(stream=None, descriptions=True, verbosity=1, runnerclass=None, warnings=None)
 
    A basic test runner implementation that outputs results to a stream. If *stream*
-   is `None`, the default, `sys.stderr` is used as the output stream. This class
+   is ``None``, the default, :data:`sys.stderr` is used as the output stream. This class
    has a few configurable parameters, but is essentially very simple.  Graphical
    applications which run test suites should provide alternate implementations.
 
@@ -1904,7 +1905,7 @@ Loading and running tests
       Added the ``warnings`` argument.
 
    .. versionchanged:: 3.2
-      The default stream is set to `sys.stderr` at instantiation time rather
+      The default stream is set to :data:`sys.stderr` at instantiation time rather
       than import time.
 
    .. method:: _makeResult()

@@ -634,20 +634,21 @@ the call as often as necessary.
 
       .. versionadded:: 3.2
 
-   .. method:: notify()
+   .. method:: notify(n=1)
 
-      Wake up a thread waiting on this condition, if any.  If the calling thread
-      has not acquired the lock when this method is called, a
+      By default, wake up one thread waiting on this condition, if any.  If the
+      calling thread has not acquired the lock when this method is called, a
       :exc:`RuntimeError` is raised.
 
-      This method wakes up one of the threads waiting for the condition
-      variable, if any are waiting; it is a no-op if no threads are waiting.
+      This method wakes up at most *n* of the threads waiting for the condition
+      variable; it is a no-op if no threads are waiting.
 
-      The current implementation wakes up exactly one thread, if any are
-      waiting.  However, it's not safe to rely on this behavior.  A future,
-      optimized implementation may occasionally wake up more than one thread.
+      The current implementation wakes up exactly *n* threads, if at least *n*
+      threads are waiting.  However, it's not safe to rely on this behavior.
+      A future, optimized implementation may occasionally wake up more than
+      *n* threads.
 
-      Note: the awakened thread does not actually return from its :meth:`wait`
+      Note: an awakened thread does not actually return from its :meth:`wait`
       call until it can reacquire the lock.  Since :meth:`notify` does not
       release the lock, its caller should.
 
@@ -781,8 +782,10 @@ An event object manages an internal flag that can be set to true with the
       floating point number specifying a timeout for the operation in seconds
       (or fractions thereof).
 
-      This method returns the internal flag on exit, so it will always return
-      ``True`` except if a timeout is given and the operation times out.
+      This method returns true if and only if the internal flag has been set to
+      true, either before the wait call or after the wait starts, so it will
+      always return ``True`` except if a timeout is given and the operation
+      times out.
 
       .. versionchanged:: 3.1
          Previously, the method always returned ``None``.
@@ -864,7 +867,7 @@ As an example, here is a simple way to synchronize a client and server thread::
 
       Pass the barrier.  When all the threads party to the barrier have called
       this function, they are all released simultaneously.  If a *timeout* is
-      provided, is is used in preference to any that was supplied to the class
+      provided, it is used in preference to any that was supplied to the class
       constructor.
 
       The return value is an integer in the range 0 to *parties* -- 1, different

@@ -252,16 +252,6 @@ _PyImportHooks_Init(void)
     Py_DECREF(path_hooks);
 }
 
-void
-_PyImport_Fini(void)
-{
-    Py_XDECREF(extensions);
-    extensions = NULL;
-    PyMem_DEL(_PyImport_Filetab);
-    _PyImport_Filetab = NULL;
-}
-
-
 /* Locking primitives to prevent parallel imports of the same module
    in different threads to return with a partially loaded module.
    These calls are serialized by the global interpreter lock. */
@@ -372,6 +362,21 @@ imp_release_lock(PyObject *self, PyObject *noargs)
 #endif
     Py_INCREF(Py_None);
     return Py_None;
+}
+
+void
+_PyImport_Fini(void)
+{
+    Py_XDECREF(extensions);
+    extensions = NULL;
+    PyMem_DEL(_PyImport_Filetab);
+    _PyImport_Filetab = NULL;
+#ifdef WITH_THREAD
+    if (import_lock != NULL) {
+        PyThread_free_lock(import_lock);
+        import_lock = NULL;
+    }
+#endif
 }
 
 static void
@@ -1221,9 +1226,9 @@ write_compiled_module(PyCodeObject *co, char *cpathname, struct stat *srcstat)
         (void) unlink(cpathname);
         return;
     }
-    /* Now write the true mtime */
+    /* Now write the true mtime (as a 32-bit field) */
     fseek(fp, 4L, 0);
-    assert(mtime < LONG_MAX);
+    assert(mtime <= 0xFFFFFFFF);
     PyMarshal_WriteLongToFile((long)mtime, fp, Py_MARSHAL_VERSION);
     fflush(fp);
     fclose(fp);
@@ -1297,17 +1302,14 @@ load_source_module(char *name, char *pathname, FILE *fp)
                      pathname);
         return NULL;
     }
-#if SIZEOF_TIME_T > 4
-    /* Python's .pyc timestamp handling presumes that the timestamp fits
-       in 4 bytes. This will be fine until sometime in the year 2038,
-       when a 4-byte signed time_t will overflow.
-     */
-    if (st.st_mtime >> 32) {
-        PyErr_SetString(PyExc_OverflowError,
-            "modification time overflows a 4 byte field");
-        return NULL;
+    if (sizeof st.st_mtime > 4) {
+        /* Python's .pyc timestamp handling presumes that the timestamp fits
+           in 4 bytes. Since the code only does an equality comparison,
+           ordering is not important and we can safely ignore the higher bits
+           (collisions are extremely unlikely).
+         */
+        st.st_mtime &= 0xFFFFFFFF;
     }
-#endif
     cpathname = make_compiled_pathname(
         pathname, buf, (size_t)MAXPATHLEN + 1, !Py_OptimizeFlag);
     if (cpathname != NULL &&
@@ -1591,7 +1593,7 @@ find_module(char *fullname, char *subname, PyObject *path, char *buf,
 
         meta_path = PySys_GetObject("meta_path");
         if (meta_path == NULL || !PyList_Check(meta_path)) {
-            PyErr_SetString(PyExc_ImportError,
+            PyErr_SetString(PyExc_RuntimeError,
                             "sys.meta_path must be a list of "
                             "import hooks");
             return NULL;
@@ -1641,14 +1643,14 @@ find_module(char *fullname, char *subname, PyObject *path, char *buf,
     }
 
     if (path == NULL || !PyList_Check(path)) {
-        PyErr_SetString(PyExc_ImportError,
+        PyErr_SetString(PyExc_RuntimeError,
                         "sys.path must be a list of directory names");
         return NULL;
     }
 
     path_hooks = PySys_GetObject("path_hooks");
     if (path_hooks == NULL || !PyList_Check(path_hooks)) {
-        PyErr_SetString(PyExc_ImportError,
+        PyErr_SetString(PyExc_RuntimeError,
                         "sys.path_hooks must be a list of "
                         "import hooks");
         return NULL;
@@ -1656,7 +1658,7 @@ find_module(char *fullname, char *subname, PyObject *path, char *buf,
     path_importer_cache = PySys_GetObject("path_importer_cache");
     if (path_importer_cache == NULL ||
         !PyDict_Check(path_importer_cache)) {
-        PyErr_SetString(PyExc_ImportError,
+        PyErr_SetString(PyExc_RuntimeError,
                         "sys.path_importer_cache must be a dict");
         return NULL;
     }
@@ -1763,6 +1765,7 @@ find_module(char *fullname, char *subname, PyObject *path, char *buf,
         saved_namelen = namelen;
 #endif /* PYOS_OS2 */
         for (fdp = _PyImport_Filetab; fdp->suffix != NULL; fdp++) {
+            struct stat statbuf;
 #if defined(PYOS_OS2) && defined(HAVE_DYNAMIC_LOADING)
             /* OS/2 limits DLLs to 8 character names (w/o
                extension)
@@ -1791,10 +1794,16 @@ find_module(char *fullname, char *subname, PyObject *path, char *buf,
             strcpy(buf+len, fdp->suffix);
             if (Py_VerboseFlag > 1)
                 PySys_WriteStderr("# trying %s\n", buf);
+
             filemode = fdp->mode;
             if (filemode[0] == 'U')
                 filemode = "r" PY_STDIOTEXTMODE;
-            fp = fopen(buf, filemode);
+
+            if (stat(buf, &statbuf) == 0 && S_ISDIR(statbuf.st_mode))
+                /* it's a directory */
+                fp = NULL;
+            else
+                fp = fopen(buf, filemode);
             if (fp != NULL) {
                 if (case_ok(buf, len, namelen, name))
                     break;
@@ -2157,6 +2166,7 @@ init_builtin(char *name)
 
     for (p = PyImport_Inittab; p->name != NULL; p++) {
         PyObject *mod;
+        PyModuleDef *def;
         if (strcmp(name, p->name) == 0) {
             if (p->initfunc == NULL) {
                 PyErr_Format(PyExc_ImportError,
@@ -2169,6 +2179,9 @@ init_builtin(char *name)
             mod = (*p->initfunc)();
             if (mod == 0)
                 return -1;
+            /* Remember pointer to module init function. */
+            def = PyModule_GetDef(mod);
+            def->m_base.m_init = p->initfunc;
             if (_PyImport_FixupBuiltin(mod, name) < 0)
                 return -1;
             /* FixupExtension has put the module into sys.modules,
@@ -2349,7 +2362,9 @@ PyImport_ImportModuleNoBlock(const char *name)
 {
     PyObject *result;
     PyObject *modules;
+#ifdef WITH_THREAD
     long me;
+#endif
 
     /* Try to get the module from sys.modules[name] */
     modules = PyImport_GetModuleDict();
@@ -3171,6 +3186,8 @@ call_find_module(char *name, PyObject *path)
             fd = dup(fd);
         fclose(fp);
         fp = NULL;
+        if (fd == -1)
+            return PyErr_SetFromErrno(PyExc_OSError);
     }
     if (fd != -1) {
         if (strchr(fdp->mode, 'b') == NULL) {
@@ -3178,8 +3195,10 @@ call_find_module(char *name, PyObject *path)
                memory. */
             found_encoding = PyTokenizer_FindEncoding(fd);
             lseek(fd, 0, 0); /* Reset position */
-            if (found_encoding == NULL && PyErr_Occurred())
+            if (found_encoding == NULL && PyErr_Occurred()) {
+                close(fd);
                 return NULL;
+            }
             encoding = (found_encoding != NULL) ? found_encoding :
                    (char*)PyUnicode_GetDefaultEncoding();
         }
@@ -3520,7 +3539,8 @@ imp_cache_from_source(PyObject *self, PyObject *args, PyObject *kws)
 }
 
 PyDoc_STRVAR(doc_cache_from_source,
-"Given the path to a .py file, return the path to its .pyc/.pyo file.\n\
+"cache_from_source(path, [debug_override]) -> path\n\
+Given the path to a .py file, return the path to its .pyc/.pyo file.\n\
 \n\
 The .py file does not need to exist; this simply returns the path to the\n\
 .pyc/.pyo file calculated as if the .py file were imported.  The extension\n\
@@ -3555,7 +3575,8 @@ imp_source_from_cache(PyObject *self, PyObject *args, PyObject *kws)
 }
 
 PyDoc_STRVAR(doc_source_from_cache,
-"Given the path to a .pyc./.pyo file, return the path to its .py file.\n\
+"source_from_cache(path) -> path\n\
+Given the path to a .pyc./.pyo file, return the path to its .py file.\n\
 \n\
 The .pyc/.pyo file does not need to exist; this simply returns the path to\n\
 the .py file calculated to correspond to the .pyc/.pyo file.  If path\n\

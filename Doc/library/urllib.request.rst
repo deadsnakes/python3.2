@@ -124,10 +124,10 @@ The :mod:`urllib.request` module defines the following functions:
 .. function:: getproxies()
 
    This helper function returns a dictionary of scheme to proxy server URL
-   mappings. It scans the environment for variables named ``<scheme>_proxy``
-   for all operating systems first, and when it cannot find it, looks for proxy
-   information from Mac OSX System Configuration for Mac OS X and Windows
-   Systems Registry for Windows.
+   mappings. It scans the environment for variables named ``<scheme>_proxy``,
+   in a case insensitive approach, for all operating systems first, and when it
+   cannot find it, looks for proxy information from Mac OSX System
+   Configuration for Mac OS X and Windows Systems Registry for Windows.
 
 
 The following classes are provided:
@@ -1257,11 +1257,11 @@ some point in the future.
      pair: HTTP; protocol
      pair: FTP; protocol
 
-* Currently, only the following protocols are supported: HTTP, (versions 0.9 and
-  1.0),  FTP, and local files.
+* Currently, only the following protocols are supported: HTTP (versions 0.9 and
+  1.0), FTP, and local files.
 
-* The caching feature of :func:`urlretrieve` has been disabled until I find the
-  time to hack proper processing of Expiration time headers.
+* The caching feature of :func:`urlretrieve` has been disabled until someone
+  finds the time to hack proper processing of Expiration time headers.
 
 * There should be a function to query whether a particular URL is in the cache.
 

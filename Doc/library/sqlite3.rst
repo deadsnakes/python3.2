@@ -243,7 +243,7 @@ Connection Objects
 .. method:: Connection.commit()
 
    This method commits the current transaction. If you don't call this method,
-   anything you did since the last call to ``commit()`` is not visible from from
+   anything you did since the last call to ``commit()`` is not visible from
    other database connections. If you wonder why you don't see the data you've
    written to the database, please check you didn't forget to call this method.
 
@@ -472,13 +472,9 @@ Cursor Objects
    kinds of placeholders: question marks (qmark style) and named placeholders
    (named style).
 
-   This example shows how to use parameters with qmark style:
+   Here's an example of both styles:
 
    .. literalinclude:: ../includes/sqlite3/execute_1.py
-
-   This example shows how to use the named style:
-
-   .. literalinclude:: ../includes/sqlite3/execute_2.py
 
    :meth:`execute` will only execute a single SQL statement. If you try to execute
    more than one statement with it, it will raise a Warning. Use
@@ -547,18 +543,17 @@ Cursor Objects
    attribute, the database engine's own support for the determination of "rows
    affected"/"rows selected" is quirky.
 
-   For ``DELETE`` statements, SQLite reports :attr:`rowcount` as 0 if you make a
-   ``DELETE FROM table`` without any condition.
-
    For :meth:`executemany` statements, the number of modifications are summed up
    into :attr:`rowcount`.
 
    As required by the Python DB API Spec, the :attr:`rowcount` attribute "is -1 in
    case no ``executeXX()`` has been performed on the cursor or the rowcount of the
-   last operation is not determinable by the interface".
+   last operation is not determinable by the interface". This includes ``SELECT``
+   statements because we cannot determine the number of rows a query produced
+   until all rows were fetched.
 
-   This includes ``SELECT`` statements because we cannot determine the number of
-   rows a query produced until all rows were fetched.
+   With SQLite versions before 3.6.5, :attr:`rowcount` is set to 0 if
+   you make a ``DELETE FROM table`` without any condition.
 
 .. attribute:: Cursor.lastrowid
 
@@ -761,7 +756,7 @@ and constructs a :class:`Point` object from it.
 ::
 
    def convert_point(s):
-       x, y = map(float, s.split(";"))
+       x, y = map(float, s.split(b";"))
        return Point(x, y)
 
 Now you need to make the :mod:`sqlite3` module know that what you select from
