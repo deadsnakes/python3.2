@@ -89,12 +89,7 @@ import re as _re
 import sys as _sys
 import textwrap as _textwrap
 
-try:
-    from gettext import gettext
-except ImportError:
-    def gettext(message):
-        return message
-_ = gettext
+from gettext import gettext as _, ngettext
 
 
 def _callable(obj):
