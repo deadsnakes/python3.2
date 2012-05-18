@@ -1,10 +1,11 @@
-python3.2 (3.2.2-1+lucid1) lucid; urgency=low
+python3.2 (3.2.3-1+lucid1) lucid; urgency=low
 
+  * Imported new upstream release Python 3.2.3.
   * New version numbering scheme.
   * Use /usr/include/ncursesw for _curses and _curses_panel modules.
   * Add python3.2-complete metapackage.
 
- -- Felix Krull <f_krull@gmx.de>  Sat, 28 Jan 2012 22:45:24 +0100
+ -- Felix Krull <f_krull@gmx.de>  Fri, 18 May 2012 16:50:37 +0200
 
 python3.2 (3.2.2-0~ppa1~lucid1) lucid; urgency=low
 
