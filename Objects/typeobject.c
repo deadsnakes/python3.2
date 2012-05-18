@@ -967,8 +967,6 @@ subtype_dealloc(PyObject *self)
     assert(basedealloc);
     basedealloc(self);
 
-    PyType_Modified(type);
-
     /* Can't reference self beyond this point */
     Py_DECREF(type);
 
@@ -1912,6 +1910,42 @@ PyType_GetFlags(PyTypeObject *type)
     return type->tp_flags;
 }
 
+/* Determine the most derived metatype. */
+PyTypeObject *
+_PyType_CalculateMetaclass(PyTypeObject *metatype, PyObject *bases)
+{
+    Py_ssize_t i, nbases;
+    PyTypeObject *winner;
+    PyObject *tmp;
+    PyTypeObject *tmptype;
+
+    /* Determine the proper metatype to deal with this,
+       and check for metatype conflicts while we're at it.
+       Note that if some other metatype wins to contract,
+       it's possible that its instances are not types. */
+
+    nbases = PyTuple_GET_SIZE(bases);
+    winner = metatype;
+    for (i = 0; i < nbases; i++) {
+        tmp = PyTuple_GET_ITEM(bases, i);
+        tmptype = Py_TYPE(tmp);
+        if (PyType_IsSubtype(winner, tmptype))
+            continue;
+        if (PyType_IsSubtype(tmptype, winner)) {
+            winner = tmptype;
+            continue;
+        }
+        /* else: */
+        PyErr_SetString(PyExc_TypeError,
+                        "metaclass conflict: "
+                        "the metaclass of a derived class "
+                        "must be a (non-strict) subclass "
+                        "of the metaclasses of all its bases");
+        return NULL;
+    }
+    return winner;
+}
+
 static PyObject *
 type_new(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
 {
@@ -1955,28 +1989,12 @@ type_new(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
                                      &PyDict_Type, &dict))
         return NULL;
 
-    /* Determine the proper metatype to deal with this,
-       and check for metatype conflicts while we're at it.
-       Note that if some other metatype wins to contract,
-       it's possible that its instances are not types. */
-    nbases = PyTuple_GET_SIZE(bases);
-    winner = metatype;
-    for (i = 0; i < nbases; i++) {
-        tmp = PyTuple_GET_ITEM(bases, i);
-        tmptype = Py_TYPE(tmp);
-        if (PyType_IsSubtype(winner, tmptype))
-            continue;
-        if (PyType_IsSubtype(tmptype, winner)) {
-            winner = tmptype;
-            continue;
-        }
-        PyErr_SetString(PyExc_TypeError,
-                        "metaclass conflict: "
-                        "the metaclass of a derived class "
-                        "must be a (non-strict) subclass "
-                        "of the metaclasses of all its bases");
+    /* Determine the proper metatype to deal with this: */
+    winner = _PyType_CalculateMetaclass(metatype, bases);
+    if (winner == NULL) {
         return NULL;
     }
+
     if (winner != metatype) {
         if (winner->tp_new != type_new) /* Pass it to the winner */
             return winner->tp_new(winner, args, kwds);
@@ -1984,6 +2002,7 @@ type_new(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
     }
 
     /* Adjust for empty tuple bases */
+    nbases = PyTuple_GET_SIZE(bases);
     if (nbases == 0) {
         bases = PyTuple_Pack(1, &PyBaseObject_Type);
         if (bases == NULL)
@@ -2093,8 +2112,10 @@ type_new(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
                  PyUnicode_CompareWithASCIIString(tmp, "__weakref__") == 0))
                 continue;
             tmp =_Py_Mangle(name, tmp);
-            if (!tmp)
+            if (!tmp) {
+                Py_DECREF(newslots);
                 goto bad_slots;
+            }
             PyList_SET_ITEM(newslots, j, tmp);
             j++;
         }
@@ -2326,7 +2347,8 @@ static short slotoffsets[] = {
 #include "typeslots.inc"
 };
 
-PyObject* PyType_FromSpec(PyType_Spec *spec)
+PyObject *
+PyType_FromSpec(PyType_Spec *spec)
 {
     PyHeapTypeObject *res = (PyHeapTypeObject*)PyType_GenericAlloc(&PyType_Type, 0);
     char *res_start = (char*)res;
@@ -2363,6 +2385,9 @@ PyObject* PyType_FromSpec(PyType_Spec *spec)
             res->ht_type.tp_doc = tp_doc;
         }
     }
+
+    if (PyType_Ready(&res->ht_type) < 0)
+        goto fail;
 
     return (PyObject*)res;
 
@@ -2622,14 +2647,15 @@ type_clear(PyTypeObject *type)
        for heaptypes. */
     assert(type->tp_flags & Py_TPFLAGS_HEAPTYPE);
 
-    /* The only field we need to clear is tp_mro, which is part of a
-       hard cycle (its first element is the class itself) that won't
-       be broken otherwise (it's a tuple and tuples don't have a
+    /* We need to invalidate the method cache carefully before clearing
+       the dict, so that other objects caught in a reference cycle
+       don't start calling destroyed methods.
+
+       Otherwise, the only field we need to clear is tp_mro, which is
+       part of a hard cycle (its first element is the class itself) that
+       won't be broken otherwise (it's a tuple and tuples don't have a
        tp_clear handler).  None of the other fields need to be
        cleared, and here's why:
-
-       tp_dict:
-           It is a dict, so the collector will call its tp_clear.
 
        tp_cache:
            Not used; if it were, it would be a dict.
@@ -2647,6 +2673,9 @@ type_clear(PyTypeObject *type)
            A tuple of strings can't be part of a cycle.
     */
 
+    PyType_Modified(type);
+    if (type->tp_dict)
+        PyDict_Clear(type->tp_dict);
     Py_CLEAR(type->tp_mro);
 
     return 0;
@@ -5533,25 +5562,25 @@ static slotdef slotdefs[] = {
     NBSLOT("__index__", nb_index, slot_nb_index, wrap_unaryfunc,
            "x[y:z] <==> x[y.__index__():z.__index__()]"),
     IBSLOT("__iadd__", nb_inplace_add, slot_nb_inplace_add,
-           wrap_binaryfunc, "+"),
+           wrap_binaryfunc, "+="),
     IBSLOT("__isub__", nb_inplace_subtract, slot_nb_inplace_subtract,
-           wrap_binaryfunc, "-"),
+           wrap_binaryfunc, "-="),
     IBSLOT("__imul__", nb_inplace_multiply, slot_nb_inplace_multiply,
-           wrap_binaryfunc, "*"),
+           wrap_binaryfunc, "*="),
     IBSLOT("__imod__", nb_inplace_remainder, slot_nb_inplace_remainder,
-           wrap_binaryfunc, "%"),
+           wrap_binaryfunc, "%="),
     IBSLOT("__ipow__", nb_inplace_power, slot_nb_inplace_power,
-           wrap_binaryfunc, "**"),
+           wrap_binaryfunc, "**="),
     IBSLOT("__ilshift__", nb_inplace_lshift, slot_nb_inplace_lshift,
-           wrap_binaryfunc, "<<"),
+           wrap_binaryfunc, "<<="),
     IBSLOT("__irshift__", nb_inplace_rshift, slot_nb_inplace_rshift,
-           wrap_binaryfunc, ">>"),
+           wrap_binaryfunc, ">>="),
     IBSLOT("__iand__", nb_inplace_and, slot_nb_inplace_and,
-           wrap_binaryfunc, "&"),
+           wrap_binaryfunc, "&="),
     IBSLOT("__ixor__", nb_inplace_xor, slot_nb_inplace_xor,
-           wrap_binaryfunc, "^"),
+           wrap_binaryfunc, "^="),
     IBSLOT("__ior__", nb_inplace_or, slot_nb_inplace_or,
-           wrap_binaryfunc, "|"),
+           wrap_binaryfunc, "|="),
     BINSLOT("__floordiv__", nb_floor_divide, slot_nb_floor_divide, "//"),
     RBINSLOT("__rfloordiv__", nb_floor_divide, slot_nb_floor_divide, "//"),
     BINSLOT("__truediv__", nb_true_divide, slot_nb_true_divide, "/"),

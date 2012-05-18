@@ -89,6 +89,7 @@ int Py_FrozenFlag; /* Needed by getpath.c */
 int Py_IgnoreEnvironmentFlag; /* e.g. PYTHONPATH, PYTHONHOME */
 int Py_NoUserSiteDirectory = 0; /* for -s and site.py */
 int Py_UnbufferedStdioFlag = 0; /* Unbuffered binary std{in,out,err} */
+int Py_HashRandomizationFlag = 0; /* for -R and PYTHONHASHSEED */
 
 PyThreadState *_Py_Finalizing = NULL;
 
@@ -207,6 +208,12 @@ Py_InitializeEx(int install_sigs)
         Py_OptimizeFlag = add_flag(Py_OptimizeFlag, p);
     if ((p = Py_GETENV("PYTHONDONTWRITEBYTECODE")) && *p != '\0')
         Py_DontWriteBytecodeFlag = add_flag(Py_DontWriteBytecodeFlag, p);
+    /* The variable is only tested for existence here; _PyRandom_Init will
+       check its value further. */
+    if ((p = Py_GETENV("PYTHONHASHSEED")) && *p != '\0')
+        Py_HashRandomizationFlag = add_flag(Py_HashRandomizationFlag, p);
+
+    _PyRandom_Init();
 
     interp = PyInterpreterState_New();
     if (interp == NULL)
@@ -332,6 +339,22 @@ extern void dump_counts(FILE*);
 
 /* Flush stdout and stderr */
 
+static int
+file_is_closed(PyObject *fobj)
+{
+    int r;
+    PyObject *tmp = PyObject_GetAttrString(fobj, "closed");
+    if (tmp == NULL) {
+        PyErr_Clear();
+        return 0;
+    }
+    r = PyObject_IsTrue(tmp);
+    Py_DECREF(tmp);
+    if (r < 0)
+        PyErr_Clear();
+    return r > 0;
+}
+
 static void
 flush_std_files(void)
 {
@@ -339,7 +362,7 @@ flush_std_files(void)
     PyObject *ferr = PySys_GetObject("stderr");
     PyObject *tmp;
 
-    if (fout != NULL && fout != Py_None) {
+    if (fout != NULL && fout != Py_None && !file_is_closed(fout)) {
         tmp = PyObject_CallMethod(fout, "flush", "");
         if (tmp == NULL)
             PyErr_WriteUnraisable(fout);
@@ -347,7 +370,7 @@ flush_std_files(void)
             Py_DECREF(tmp);
     }
 
-    if (ferr != NULL && ferr != Py_None) {
+    if (ferr != NULL && ferr != Py_None && !file_is_closed(ferr)) {
         tmp = PyObject_CallMethod(ferr, "flush", "");
         if (tmp == NULL)
             PyErr_Clear();
@@ -876,6 +899,19 @@ error:
     return NULL;
 }
 
+static int
+is_valid_fd(int fd)
+{
+    int dummy_fd;
+    if (fd < 0 || !_PyVerify_fd(fd))
+        return 0;
+    dummy_fd = dup(fd);
+    if (dummy_fd < 0)
+        return 0;
+    close(dummy_fd);
+    return 1;
+}
+
 /* Initialize sys.stdin, stdout, stderr and builtins.open */
 static int
 initstdio(void)
@@ -935,13 +971,9 @@ initstdio(void)
      * and fileno() may point to an invalid file descriptor. For example
      * GUI apps don't have valid standard streams by default.
      */
-    if (fd < 0) {
-#ifdef MS_WINDOWS
+    if (!is_valid_fd(fd)) {
         std = Py_None;
         Py_INCREF(std);
-#else
-        goto error;
-#endif
     }
     else {
         std = create_stdio(iomod, fd, 0, "<stdin>", encoding, errors);
@@ -954,13 +986,9 @@ initstdio(void)
 
     /* Set sys.stdout */
     fd = fileno(stdout);
-    if (fd < 0) {
-#ifdef MS_WINDOWS
+    if (!is_valid_fd(fd)) {
         std = Py_None;
         Py_INCREF(std);
-#else
-        goto error;
-#endif
     }
     else {
         std = create_stdio(iomod, fd, 1, "<stdout>", encoding, errors);
@@ -974,13 +1002,9 @@ initstdio(void)
 #if 1 /* Disable this if you have trouble debugging bootstrap stuff */
     /* Set sys.stderr, replaces the preliminary stderr */
     fd = fileno(stderr);
-    if (fd < 0) {
-#ifdef MS_WINDOWS
+    if (!is_valid_fd(fd)) {
         std = Py_None;
         Py_INCREF(std);
-#else
-        goto error;
-#endif
     }
     else {
         std = create_stdio(iomod, fd, 1, "<stderr>", encoding, "backslashreplace");
@@ -995,7 +1019,8 @@ initstdio(void)
         const char * encoding;
         encoding = _PyUnicode_AsString(encoding_attr);
         if (encoding != NULL) {
-            _PyCodec_Lookup(encoding);
+            PyObject *codec_info = _PyCodec_Lookup(encoding);
+            Py_XDECREF(codec_info);
         }
         Py_DECREF(encoding_attr);
     }
@@ -1241,8 +1266,10 @@ PyRun_SimpleFileExFlags(FILE *fp, const char *filename, int closeit,
             Py_DECREF(f);
             return -1;
         }
-        if (PyDict_SetItemString(d, "__cached__", Py_None) < 0)
+        if (PyDict_SetItemString(d, "__cached__", Py_None) < 0) {
+            Py_DECREF(f);
             return -1;
+        }
         set_file_name = 1;
         Py_DECREF(f);
     }

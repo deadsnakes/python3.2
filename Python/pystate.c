@@ -150,6 +150,12 @@ PyInterpreterState_Delete(PyInterpreterState *interp)
     *p = interp->next;
     HEAD_UNLOCK();
     free(interp);
+#ifdef WITH_THREAD
+    if (interp_head == NULL && head_mutex != NULL) {
+        PyThread_free_lock(head_mutex);
+        head_mutex = NULL;
+    }
+#endif
 }
 
 
@@ -586,9 +592,9 @@ _PyGILState_Fini(void)
     autoInterpreterState = NULL;
 }
 
-/* Reset the TLS key - called by PyOS_AfterFork.
+/* Reset the TLS key - called by PyOS_AfterFork().
  * This should not be necessary, but some - buggy - pthread implementations
- * don't flush TLS on fork, see issue #10517.
+ * don't reset TLS upon fork(), see issue #10517.
  */
 void
 _PyGILState_Reinit(void)
@@ -598,8 +604,9 @@ _PyGILState_Reinit(void)
     if ((autoTLSkey = PyThread_create_key()) == -1)
         Py_FatalError("Could not allocate TLS entry");
 
-    /* re-associate the current thread state with the new key */
-    if (PyThread_set_key_value(autoTLSkey, (void *)tstate) < 0)
+    /* If the thread had an associated auto thread state, reassociate it with
+     * the new key. */
+    if (tstate && PyThread_set_key_value(autoTLSkey, (void *)tstate) < 0)
         Py_FatalError("Couldn't create autoTLSkey mapping");
 }
 

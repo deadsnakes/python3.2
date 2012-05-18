@@ -29,11 +29,6 @@ Notes on the availability of these functions:
   objects, and result in an object of the same type, if a path or file name is
   returned.
 
-.. note::
-
-   If not separately noted, all functions that claim "Availability: Unix" are
-   supported on Mac OS X, which builds on a Unix core.
-
 * An "Availability: Unix" note means that this function is commonly found on
   Unix systems.  It does not make any claims about its existence on a specific
   operating system.
@@ -711,7 +706,7 @@ as internal buffering of data.
    by *how*: :const:`SEEK_SET` or ``0`` to set the position relative to the
    beginning of the file; :const:`SEEK_CUR` or ``1`` to set it relative to the
    current position; :const:`os.SEEK_END` or ``2`` to set it relative to the end of
-   the file.
+   the file. Return the new cursor position in bytes, starting from the beginning.
 
    Availability: Unix, Windows.
 
@@ -915,7 +910,7 @@ Files and Directories
          try:
              fp = open("myfile")
          except IOError as e:
-             if e.errno == errno.EACCESS:
+             if e.errno == errno.EACCES:
                  return "some default data"
              # Not a permission error.
              raise
@@ -1434,11 +1429,9 @@ Files and Directories
    *target_is_directory*, which defaults to ``False``.
 
    On Windows, a symlink represents a file or a directory, and does not morph to
-   the target dynamically.  For this reason, when creating a symlink on Windows,
-   if the target is not already present, the symlink will default to being a
-   file symlink.  If *target_is_directory* is set to ``True``, the symlink will
-   be created as a directory symlink.  This parameter is ignored if the target
-   exists (and the symlink is created with the same type as the target).
+   the target dynamically.  If *target_is_directory* is set to ``True``, the
+   symlink will be created as a directory symlink, otherwise as a file symlink
+   (the default).
 
    Symbolic link support was introduced in Windows 6.0 (Vista).  :func:`symlink`
    will raise a :exc:`NotImplementedError` on Windows versions earlier than 6.0.
@@ -1450,7 +1443,6 @@ Files and Directories
       users but is available to accounts which can escalate privileges to the
       administrator level. Either obtaining the privilege or running your
       application as an administrator are ways to successfully create symlinks.
-
 
       :exc:`OSError` is raised when the function is called by an unprivileged
       user.
@@ -1519,7 +1511,7 @@ Files and Directories
    ineffective, because in bottom-up mode the directories in *dirnames* are
    generated before *dirpath* itself is generated.
 
-   By default errors from the :func:`listdir` call are ignored.  If optional
+   By default, errors from the :func:`listdir` call are ignored.  If optional
    argument *onerror* is specified, it should be a function; it will be called with
    one argument, an :exc:`OSError` instance.  It can report the error to continue
    with the walk, or raise the exception to abort the walk.  Note that the filename

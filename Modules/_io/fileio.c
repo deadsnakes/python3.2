@@ -43,12 +43,6 @@
 #define SMALLCHUNK BUFSIZ
 #endif
 
-#if SIZEOF_INT < 4
-#define BIGCHUNK  (512 * 32)
-#else
-#define BIGCHUNK  (512 * 1024)
-#endif
-
 typedef struct {
     PyObject_HEAD
     int fd;
@@ -259,34 +253,23 @@ fileio_init(PyObject *oself, PyObject *args, PyObject *kwds)
     }
 
 #ifdef MS_WINDOWS
-    if (PyUnicode_Check(nameobj))
+    if (PyUnicode_Check(nameobj)) {
+        int rv = _PyUnicode_HasNULChars(nameobj);
+        if (rv) {
+            if (rv != -1)
+                PyErr_SetString(PyExc_TypeError, "embedded NUL character");
+            return -1;
+        }
         widename = PyUnicode_AS_UNICODE(nameobj);
+    }
     if (widename == NULL)
 #endif
     if (fd < 0)
     {
-        if (PyBytes_Check(nameobj) || PyByteArray_Check(nameobj)) {
-            Py_ssize_t namelen;
-            if (PyObject_AsCharBuffer(nameobj, &name, &namelen) < 0)
-                return -1;
+        if (!PyUnicode_FSConverter(nameobj, &stringobj)) {
+            return -1;
         }
-        else {
-            PyObject *u = PyUnicode_FromObject(nameobj);
-
-            if (u == NULL)
-                return -1;
-
-            stringobj = PyUnicode_EncodeFSDefault(u);
-            Py_DECREF(u);
-            if (stringobj == NULL)
-                return -1;
-            if (!PyBytes_Check(stringobj)) {
-                PyErr_SetString(PyExc_TypeError,
-                                "encoder failed to return bytes");
-                goto error;
-            }
-            name = PyBytes_AS_STRING(stringobj);
-        }
+        name = PyBytes_AS_STRING(stringobj);
     }
 
     s = mode;
@@ -512,6 +495,7 @@ fileio_readinto(fileio *self, PyObject *args)
 {
     Py_buffer pbuf;
     Py_ssize_t n, len;
+    int err;
 
     if (self->fd < 0)
         return err_closed();
@@ -535,10 +519,12 @@ fileio_readinto(fileio *self, PyObject *args)
         Py_END_ALLOW_THREADS
     } else
         n = -1;
+    err = errno;
     PyBuffer_Release(&pbuf);
     if (n < 0) {
-        if (errno == EAGAIN)
+        if (err == EAGAIN)
             Py_RETURN_NONE;
+        errno = err;
         PyErr_SetFromErrno(PyExc_IOError);
         return NULL;
     }
@@ -565,15 +551,10 @@ new_buffersize(fileio *self, size_t currentsize)
         }
     }
 #endif
-    if (currentsize > SMALLCHUNK) {
-        /* Keep doubling until we reach BIGCHUNK;
-           then keep adding BIGCHUNK. */
-        if (currentsize <= BIGCHUNK)
-            return currentsize + currentsize;
-        else
-            return currentsize + BIGCHUNK;
-    }
-    return currentsize + SMALLCHUNK;
+    /* Expand the buffer by an amount proportional to the current size,
+       giving us amortized linear-time behavior. Use a less-than-double
+       growth factor to avoid excessive allocation. */
+    return currentsize + (currentsize >> 3) + 6;
 }
 
 static PyObject *
@@ -686,9 +667,11 @@ fileio_read(fileio *self, PyObject *args)
         n = -1;
 
     if (n < 0) {
+        int err = errno;
         Py_DECREF(bytes);
-        if (errno == EAGAIN)
+        if (err == EAGAIN)
             Py_RETURN_NONE;
+        errno = err;
         PyErr_SetFromErrno(PyExc_IOError);
         return NULL;
     }
@@ -708,6 +691,7 @@ fileio_write(fileio *self, PyObject *args)
 {
     Py_buffer pbuf;
     Py_ssize_t n, len;
+    int err;
 
     if (self->fd < 0)
         return err_closed();
@@ -738,12 +722,14 @@ fileio_write(fileio *self, PyObject *args)
         Py_END_ALLOW_THREADS
     } else
         n = -1;
+    err = errno;
 
     PyBuffer_Release(&pbuf);
 
     if (n < 0) {
-        if (errno == EAGAIN)
+        if (err == EAGAIN)
             Py_RETURN_NONE;
+        errno = err;
         PyErr_SetFromErrno(PyExc_IOError);
         return NULL;
     }

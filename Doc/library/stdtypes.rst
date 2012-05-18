@@ -54,7 +54,7 @@ following values are considered false:
 
 * instances of user-defined classes, if the class defines a :meth:`__bool__` or
   :meth:`__len__` method, when that method returns the integer zero or
-  :class:`bool` value ``False``. [#]_
+  :class:`bool` value ``False``. [1]_
 
 .. index:: single: true
 
@@ -261,7 +261,7 @@ Python fully supports mixed arithmetic: when a binary arithmetic operator has
 operands of different numeric types, the operand with the "narrower" type is
 widened to that of the other, where integer is narrower than floating point,
 which is narrower than complex.  Comparisons between numbers of mixed type use
-the same rule. [#]_ The constructors :func:`int`, :func:`float`, and
+the same rule. [2]_ The constructors :func:`int`, :func:`float`, and
 :func:`complex` can be used to produce numbers of a specific type.
 
 All numeric types (except complex) support the following operations, sorted by
@@ -379,12 +379,12 @@ modules.
 
 .. _bitstring-ops:
 
-Bit-string Operations on Integer Types
+Bitwise Operations on Integer Types
 --------------------------------------
 
 .. index::
    triple: operations on; integer; types
-   pair: bit-string; operations
+   pair: bitwise; operations
    pair: shifting; operations
    pair: masking; operations
    operator: ^
@@ -392,15 +392,15 @@ Bit-string Operations on Integer Types
    operator: <<
    operator: >>
 
-Integers support additional operations that make sense only for bit-strings.
-Negative numbers are treated as their 2's complement value (this assumes a
-sufficiently large number of bits that no overflow occurs during the operation).
+Bitwise operations only make sense for integers.  Negative numbers are treated
+as their 2's complement value (this assumes a sufficiently large number of bits
+that no overflow occurs during the operation).
 
 The priorities of the binary bitwise operations are all lower than the numeric
 operations and higher than the comparisons; the unary operation ``~`` has the
 same priority as the other unary numeric operations (``+`` and ``-``).
 
-This table lists the bit-string operations sorted in ascending priority
+This table lists the bitwise operations sorted in ascending priority
 (operations in the same box have the same priority):
 
 +------------+--------------------------------+----------+
@@ -852,7 +852,7 @@ them is inefficient.
 Most sequence types support the following operations.  The ``in`` and ``not in``
 operations have the same priorities as the comparison operations.  The ``+`` and
 ``*`` operations have the same priority as the corresponding numeric operations.
-[#]_ Additional methods are provided for :ref:`typesseq-mutable`.
+[3]_ Additional methods are provided for :ref:`typesseq-mutable`.
 
 This table lists the sequence operations sorted in ascending priority
 (operations in the same box have the same priority).  In the table, *s* and *t*
@@ -873,7 +873,7 @@ are sequences of the same type; *n*, *i*, *j* and *k* are integers.
 | ``s * n, n * s`` | *n* shallow copies of *s*      | \(2)     |
 |                  | concatenated                   |          |
 +------------------+--------------------------------+----------+
-| ``s[i]``         | *i*'th item of *s*, origin 0   | \(3)     |
+| ``s[i]``         | *i*\ th item of *s*, origin 0  | \(3)     |
 +------------------+--------------------------------+----------+
 | ``s[i:j]``       | slice of *s* from *i* to *j*   | (3)(4)   |
 +------------------+--------------------------------+----------+
@@ -964,15 +964,18 @@ Notes:
    If *k* is ``None``, it is treated like ``1``.
 
 (6)
-   .. impl-detail::
+   Concatenating immutable strings always results in a new object.  This means
+   that building up a string by repeated concatenation will have a quadratic
+   runtime cost in the total string length.  To get a linear runtime cost,
+   you must switch to one of the alternatives below:
 
-      If *s* and *t* are both strings, some Python implementations such as
-      CPython can usually perform an in-place optimization for assignments of
-      the form ``s = s + t`` or ``s += t``.  When applicable, this optimization
-      makes quadratic run-time much less likely.  This optimization is both
-      version and implementation dependent.  For performance sensitive code, it
-      is preferable to use the :meth:`str.join` method which assures consistent
-      linear concatenation performance across versions and implementations.
+   * if concatenating :class:`str` objects, you can build a list and use
+     :meth:`str.join` at the end;
+
+   * if concatenating :class:`bytes` objects, you can similarly use
+     :meth:`bytes.join`, or you can do in-place concatenation with a
+     :class:`bytearray` object.  :class:`bytearray` objects are mutable and
+     have an efficient overallocation mechanism.
 
 
 .. _string-methods:
@@ -1033,7 +1036,7 @@ functions based on regular expressions.
 
 .. method:: str.expandtabs([tabsize])
 
-   Return a copy of the string where all tab characters are replaced by one or
+   Return a copy of the string where all tab characters are replaced by zero or
    more spaces, depending on the current column and the given tab size.  The
    column number is reset to zero after each newline occurring in the string.
    If *tabsize* is not given, a tab size of ``8`` characters is assumed.  This
@@ -1117,7 +1120,7 @@ functions based on regular expressions.
    characters and there is at least one character, false
    otherwise. Decimal characters are those from general category "Nd". This category
    includes digit characters, and all characters
-   that that can be used to form decimal-radix numbers, e.g. U+0660,
+   that can be used to form decimal-radix numbers, e.g. U+0660,
    ARABIC-INDIC DIGIT ZERO.
 
 
@@ -1137,10 +1140,8 @@ functions based on regular expressions.
 
 .. method:: str.islower()
 
-   Return true if all cased characters in the string are lowercase and there is at
-   least one cased character, false otherwise.  Cased characters are those with
-   general category property being one of "Lu", "Ll", or "Lt" and lowercase characters
-   are those with general category property "Ll".
+   Return true if all cased characters [4]_ in the string are lowercase and
+   there is at least one cased character, false otherwise.
 
 
 .. method:: str.isnumeric()
@@ -1180,17 +1181,15 @@ functions based on regular expressions.
 
 .. method:: str.isupper()
 
-   Return true if all cased characters in the string are uppercase and there is at
-   least one cased character, false otherwise. Cased characters are those with
-   general category property being one of "Lu", "Ll", or "Lt" and uppercase characters
-   are those with general category property "Lu".
+   Return true if all cased characters [4]_ in the string are uppercase and
+   there is at least one cased character, false otherwise.
 
 
 .. method:: str.join(iterable)
 
    Return a string which is the concatenation of the strings in the
    :term:`iterable` *iterable*.  A :exc:`TypeError` will be raised if there are
-   any non-string values in *seq*, including :class:`bytes` objects.  The
+   any non-string values in *iterable*, including :class:`bytes` objects.  The
    separator between elements is the string providing this method.
 
 
@@ -1198,12 +1197,13 @@ functions based on regular expressions.
 
    Return the string left justified in a string of length *width*. Padding is done
    using the specified *fillchar* (default is a space).  The original string is
-   returned if *width* is less than ``len(s)``.
+   returned if *width* is less than or equal to ``len(s)``.
 
 
 .. method:: str.lower()
 
-   Return a copy of the string converted to lowercase.
+   Return a copy of the string with all the cased characters [4]_ converted to
+   lowercase.
 
 
 .. method:: str.lstrip([chars])
@@ -1266,7 +1266,7 @@ functions based on regular expressions.
 
    Return the string right justified in a string of length *width*. Padding is done
    using the specified *fillchar* (default is a space). The original string is
-   returned if *width* is less than ``len(s)``.
+   returned if *width* is less than or equal to ``len(s)``.
 
 
 .. method:: str.rpartition(sep)
@@ -1404,14 +1404,17 @@ functions based on regular expressions.
 
 .. method:: str.upper()
 
-   Return a copy of the string converted to uppercase.
+   Return a copy of the string with all the cased characters [4]_ converted to
+   uppercase.  Note that ``str.upper().isupper()`` might be ``False`` if ``s``
+   contains uncased characters or if the Unicode category of the resulting
+   character(s) is not "Lu" (Letter, uppercase), but e.g. "Lt" (Letter, titlecase).
 
 
 .. method:: str.zfill(width)
 
    Return the numeric string left filled with zeros in a string of length
    *width*.  A sign prefix is handled correctly.  The original string is
-   returned if *width* is less than ``len(s)``.
+   returned if *width* is less than or equal to ``len(s)``.
 
 
 
@@ -1444,7 +1447,7 @@ specifications in *format* are replaced with zero or more elements of *values*.
 The effect is similar to the using :c:func:`sprintf` in the C language.
 
 If *format* requires a single argument, *values* may be a single non-tuple
-object. [#]_  Otherwise, *values* must be a tuple with exactly the number of
+object. [5]_  Otherwise, *values* must be a tuple with exactly the number of
 items specified by the format string, or a single mapping object (for example, a
 dictionary).
 
@@ -2372,10 +2375,10 @@ copying.  Memory is generally interpreted as simple bytes.
       bytearray(b'zbcefg')
       >>> v[1:4] = b'123'
       >>> data
-      bytearray(b'a123fg')
+      bytearray(b'z123fg')
       >>> v[2] = b'spam'
       Traceback (most recent call last):
-      File "<stdin>", line 1, in <module>
+        File "<stdin>", line 1, in <module>
       ValueError: cannot modify size of memoryview object
 
    Notice how the size of the memoryview object cannot be changed.
@@ -2712,6 +2715,8 @@ special operations.  There is exactly one ellipsis object, named
 It is written as ``Ellipsis`` or ``...``.
 
 
+.. _bltin-notimplemented-object:
+
 The NotImplemented Object
 -------------------------
 
@@ -2722,6 +2727,8 @@ information.
 It is written as ``NotImplemented``.
 
 
+.. _bltin-boolean-values:
+
 Boolean Values
 --------------
 
@@ -2729,9 +2736,9 @@ Boolean values are the two constant objects ``False`` and ``True``.  They are
 used to represent truth values (although other values can also be considered
 false or true).  In numeric contexts (for example when used as the argument to
 an arithmetic operator), they behave like the integers 0 and 1, respectively.
-The built-in function :func:`bool` can be used to cast any value to a Boolean,
-if the value can be interpreted as a truth value (see section Truth Value
-Testing above).
+The built-in function :func:`bool` can be used to convert any value to a
+Boolean, if the value can be interpreted as a truth value (see section
+:ref:`truth` above).
 
 .. index::
    single: False
@@ -2781,8 +2788,6 @@ types, where they are relevant.  Some of these are not reported by the
    The name of the class or type.
 
 
-The following attributes are only supported by :term:`new-style class`\ es.
-
 .. attribute:: class.__mro__
 
    This attribute is a tuple of classes that are considered when looking for
@@ -2798,23 +2803,26 @@ The following attributes are only supported by :term:`new-style class`\ es.
 
 .. method:: class.__subclasses__
 
-   Each new-style class keeps a list of weak references to its immediate
-   subclasses.  This method returns a list of all those references still alive.
+   Each class keeps a list of weak references to its immediate subclasses.  This
+   method returns a list of all those references still alive.
    Example::
 
       >>> int.__subclasses__()
-      [<type 'bool'>]
+      [<class 'bool'>]
 
 
 .. rubric:: Footnotes
 
-.. [#] Additional information on these special methods may be found in the Python
+.. [1] Additional information on these special methods may be found in the Python
    Reference Manual (:ref:`customization`).
 
-.. [#] As a consequence, the list ``[1, 2]`` is considered equal to ``[1.0, 2.0]``, and
+.. [2] As a consequence, the list ``[1, 2]`` is considered equal to ``[1.0, 2.0]``, and
    similarly for tuples.
 
-.. [#] They must have since the parser can't tell the type of the operands.
+.. [3] They must have since the parser can't tell the type of the operands.
 
-.. [#] To format only a tuple you should therefore provide a singleton tuple whose only
+.. [4] Cased characters are those with general category property being one of
+   "Lu" (Letter, uppercase), "Ll" (Letter, lowercase), or "Lt" (Letter, titlecase).
+
+.. [5] To format only a tuple you should therefore provide a singleton tuple whose only
    element is the tuple to be formatted.

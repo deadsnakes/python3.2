@@ -328,7 +328,7 @@ the bytes/string dichotomy. Because Python 2 allowed the ``str`` type to hold
 textual data, people have over the years been rather loose in their delineation
 of what ``str`` instances held text compared to bytes. In Python 3 you cannot
 be so care-free anymore and need to properly handle the difference. The key
-handling this issue to to make sure that **every** string literal in your
+handling this issue to make sure that **every** string literal in your
 Python 2 code is either syntactically of functionally marked as either bytes or
 text data. After this is done you then need to make sure your APIs are designed
 to either handle a specific type or made to be properly polymorphic.
@@ -504,6 +504,18 @@ breaking the doctests up into smaller pieces to make it more manageable to fix.
 Otherwise it might very well be worth your time and effort to port your tests
 to :mod:`unittest`.
 
+
+Update `map` for imbalanced input sequences
+'''''''''''''''''''''''''''''''''''''''''''
+
+With Python 2, `map` would pad input sequences of unequal length with
+`None` values, returning a sequence as long as the longest input sequence.
+
+With Python 3, if the input sequences to `map` are of unequal length, `map`
+will stop at the termination of the shortest of the sequences. For full
+compatibility with `map` from Python 2.x, also wrap the sequences in
+:func:`itertools.zip_longest`, e.g. ``map(func, *sequences)`` becomes
+``list(map(func, itertools.zip_longest(*sequences)))``.
 
 Eliminate ``-3`` Warnings
 -------------------------
