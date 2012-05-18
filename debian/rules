@@ -606,7 +606,7 @@ endif
 		$(d)/usr/lib/python3/dist-packages
 	rm -f $(d)/usr/lib/python3/dist-packages/README
 
-	: # remove files, which are not packaged
+	: # remove files which are not packaged
 	rm -rf $(d)/usr/lib/python$(VER)/ctypes/macholib
 
 	: # fix some file permissions
@@ -724,6 +724,9 @@ endif
 		usr/bin/python$(VER)*-config \
 		usr/lib/python$(VER)/distutils/command/wininst-*.exe
 
+	rm $(d)/usr/lib/libpython$(VER)mu.a
+	dh_link -p$(p_dev) usr/lib/python$(VER)/config-$(VER)mu/libpython$(VER)mu.a \
+		usr/lib/libpython$(VER)mu.a
 	cp -p $(buildd_shared)/libpython$(VER)mu-pic.a \
 		$(d_dev)/usr/lib/python$(VER)/config-$(VER)mu/
 
