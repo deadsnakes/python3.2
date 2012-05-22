@@ -53,6 +53,9 @@ export NVER=3.3
 export PVER=python3.2
 export PRIORITY=$(shell echo $(VER) | tr -d '.')0
 
+ABIFLAGS := mu
+DEBUG_ABIFLAGS := d$(ABIFLAGS)
+
 PREVVER	:= $(shell awk '/^python/ && NR > 1 {print substr($$2,2,length($$2)-2); exit}' debian/changelog)
 
 # default versions are built from the python-defaults source package
@@ -197,7 +200,7 @@ stamps/stamp-build-shared: stamps/stamp-configure-shared
 #		libpython$(VER).so
 	: # build a static library with PIC objects
 	$(MAKE) $(NJOBS) -C $(buildd_shared) \
-		LIBRARY=libpython$(VER)mu-pic.a libpython$(VER)mu-pic.a
+		LIBRARY=libpython$(VER)$(ABIFLAGS)-pic.a libpython$(VER)$(ABIFLAGS)-pic.a
 	touch stamps/stamp-build-shared
 
 stamps/stamp-build-debug: stamps/stamp-configure-debug
@@ -211,7 +214,7 @@ stamps/stamp-build-shared-debug: stamps/stamp-configure-shared-debug
 	: # build the shared debug library
 # not building with $(NJOBS), see issue #4279
 	$(MAKE) -C $(buildd_shdebug) \
-		libpython$(VER)dmu.so
+		libpython$(VER)$(DEBUG_ABIFLAGS).so
 	touch stamps/stamp-build-shared-debug
 
 common_configure_args = \
@@ -636,18 +639,18 @@ endif
 		$(d)/$(scriptdir)/lib-dynload/Python.egg-info
 
 	dh_installdirs -p$(p_lib) \
-		$(scriptdir)/config-$(VER)mu \
+		$(scriptdir)/config-$(VER)$(ABIFLAGS) \
 		usr/share/doc
 	: # install the shared library
-	cp -p $(buildd_shared)/libpython$(VER)mu.so.1.0 $(d_lib)/usr/lib/
-	ln -sf libpython$(VER)mu.so.1.0 $(d_lib)/usr/lib/libpython$(VER)mu.so.1
-	ln -sf ../../libpython$(VER)mu.so \
-		$(d_lib)/$(scriptdir)/config-$(VER)mu/libpython$(VER)mu.so
-	ln -sf libpython$(VER)mu.so \
-		$(d_lib)/$(scriptdir)/config-$(VER)mu/libpython$(VER).so
+	cp -p $(buildd_shared)/libpython$(VER)$(ABIFLAGS).so.1.0 $(d_lib)/usr/lib/
+	ln -sf libpython$(VER)$(ABIFLAGS).so.1.0 $(d_lib)/usr/lib/libpython$(VER)$(ABIFLAGS).so.1
+	ln -sf ../../libpython$(VER)$(ABIFLAGS).so \
+		$(d_lib)/$(scriptdir)/config-$(VER)$(ABIFLAGS)/libpython$(VER)$(ABIFLAGS).so
+	ln -sf libpython$(VER)$(ABIFLAGS).so \
+		$(d_lib)/$(scriptdir)/config-$(VER)$(ABIFLAGS)/libpython$(VER).so
 	ln -sf $(p_base) $(d_lib)/usr/share/doc/$(p_lib)
 
-	ln -sf libpython$(VER)mu.so.1 $(d)/usr/lib/libpython$(VER)mu.so
+	ln -sf libpython$(VER)$(ABIFLAGS).so.1 $(d)/usr/lib/libpython$(VER)$(ABIFLAGS).so
 
 ifeq ($(with_interp),shared)
 	: # install the statically linked runtime
@@ -660,7 +663,7 @@ endif
 	: # install the Makefile of the shared python build
 	sed -e '/^OPT/s,-O3,-O2,' \
 	    -e 's,^RUNSHARED *=.*,RUNSHARED=,' \
-		build-shared/Makefile > $(d)/$(scriptdir)/config-$(VER)mu/Makefile
+		build-shared/Makefile > $(d)/$(scriptdir)/config-$(VER)$(ABIFLAGS)/Makefile
 
 	: # Move the binary and the minimal libraries into $(p_min).
 	dh_installdirs -p$(p_min) \
@@ -668,25 +671,25 @@ endif
 		usr/bin \
 		usr/share/man/man1 \
 		$(scriptdir)/lib-dynload \
-		$(scriptdir)/config-$(VER)mu \
-		usr/include/python$(VER)mu
+		$(scriptdir)/config-$(VER)$(ABIFLAGS) \
+		usr/include/python$(VER)$(ABIFLAGS)
 	DH_COMPAT=2 dh_movefiles -p$(p_min) --sourcedir=$(d) \
 		usr/bin/python$(VER) \
-		usr/bin/python$(VER)mu \
+		usr/bin/python$(VER)$(ABIFLAGS) \
 		usr/share/man/man1/python$(VER).1 \
 		$(foreach i,$(MIN_MODS),$(scriptdir)/$(i).py) \
 		$(foreach i,$(MIN_PACKAGES),$(scriptdir)/$(i)) \
 		$(foreach i,$(MIN_ENCODINGS),$(scriptdir)/$(i)) \
-		$(scriptdir)/config-$(VER)mu/Makefile \
+		$(scriptdir)/config-$(VER)$(ABIFLAGS)/Makefile \
 		$(scriptdir)/site.py \
-		usr/include/python$(VER)mu/pyconfig.h
+		usr/include/python$(VER)$(ABIFLAGS)/pyconfig.h
 
 #		$(foreach i,$(MIN_EXTS),$(scriptdir)/lib-dynload/$(i).so) \
 #		usr/share/man/man1/python$(VER).1 \
 
-	ln -sf python$(VER)mu $(d_min)/usr/bin/python$(VER)
+	ln -sf python$(VER)$(ABIFLAGS) $(d_min)/usr/bin/python$(VER)
 	: # symlinks for the "old" config directory name
-	ln -sf config-$(VER)mu $(d_min)/$(scriptdir)/config
+	ln -sf config-$(VER)$(ABIFLAGS) $(d_min)/$(scriptdir)/config
 
 	rv=0; \
 	for i in $(MIN_EXTS); do \
@@ -717,21 +720,21 @@ endif
 	    $(d_dev)/usr/share/doc/python$(VER)/
 
 	DH_COMPAT=2 dh_movefiles -p$(p_dev) --sourcedir=$(d) \
-		usr/lib/python$(VER)/config-$(VER)mu \
-		usr/include/python$(VER)mu \
-		usr/lib/libpython$(VER)mu.so \
+		usr/lib/python$(VER)/config-$(VER)$(ABIFLAGS) \
+		usr/include/python$(VER)$(ABIFLAGS) \
+		usr/lib/libpython$(VER)$(ABIFLAGS).so \
 		usr/lib/pkgconfig/python-$(VER)*.pc \
 		usr/bin/python$(VER)*-config \
 		usr/lib/python$(VER)/distutils/command/wininst-*.exe
 
-	rm $(d)/usr/lib/libpython$(VER)mu.a
-	dh_link -p$(p_dev) usr/lib/python$(VER)/config-$(VER)mu/libpython$(VER)mu.a \
-		usr/lib/libpython$(VER)mu.a
-	cp -p $(buildd_shared)/libpython$(VER)mu-pic.a \
-		$(d_dev)/usr/lib/python$(VER)/config-$(VER)mu/
+	rm $(d)/usr/lib/libpython$(VER)$(ABIFLAGS).a
+	dh_link -p$(p_dev) usr/lib/python$(VER)/config-$(VER)$(ABIFLAGS)/libpython$(VER)$(ABIFLAGS).a \
+		usr/lib/libpython$(VER)$(ABIFLAGS).a
+	cp -p $(buildd_shared)/libpython$(VER)$(ABIFLAGS)-pic.a \
+		$(d_dev)/usr/lib/python$(VER)/config-$(VER)$(ABIFLAGS)/
 
 	: # symlinks for the "old" include directory name
-	ln -sf python$(VER)mu $(d_dev)/usr/include/python$(VER)
+	ln -sf python$(VER)$(ABIFLAGS) $(d_dev)/usr/include/python$(VER)
 
 ifeq ($(with_tk),yes)
 	: # Move the Tkinter files into $(p_tk).
@@ -860,25 +863,25 @@ endif
 		usr/bin \
 		usr/share/man/man1 \
 		$(scriptdir)/lib-dynload \
-		usr/include/$(PVER)dmu \
+		usr/include/$(PVER)$(DEBUG_ABIFLAGS) \
 		usr/lib/pkgconfig \
 		usr/share/doc/$(p_base)
 	cp -p Misc/SpecialBuilds.txt $(d_dbg)/usr/share/doc/$(p_base)/
 	cp -p debian/$(PVER)-dbg.README.Debian \
 		$(d_dbg)/usr/share/doc/$(p_base)/README.debug
-	cp -p $(buildd_debug)/python $(d_dbg)/usr/bin/$(PVER)dmu
-	ln -sf python$(VER)dmu $(d_dbg)/usr/bin/$(PVER)-dbg
+	cp -p $(buildd_debug)/python $(d_dbg)/usr/bin/$(PVER)$(DEBUG_ABIFLAGS)
+	ln -sf python$(VER)$(DEBUG_ABIFLAGS) $(d_dbg)/usr/bin/$(PVER)-dbg
 	sed '1s,#!.*python[^ ]*\(.*\),#! $(PY_INTERPRETER)-dbg\1,' \
 		$(d)-dbg/usr/bin/$(PVER)-config \
-		> $(d_dbg)/usr/bin/$(PVER)dmu-config
-	chmod 755 $(d_dbg)/usr/bin/$(PVER)dmu-config
-	ln -sf $(PVER)dmu-config $(d_dbg)/usr/bin/$(PVER)-dbg-config
+		> $(d_dbg)/usr/bin/$(PVER)$(DEBUG_ABIFLAGS)-config
+	chmod 755 $(d_dbg)/usr/bin/$(PVER)$(DEBUG_ABIFLAGS)-config
+	ln -sf $(PVER)$(DEBUG_ABIFLAGS)-config $(d_dbg)/usr/bin/$(PVER)-dbg-config
 	cp -p $(buildd_debug)/build/lib*/*.so \
 		$(d_dbg)/$(scriptdir)/lib-dynload/
-	cp -p $(buildd_shdebug)/libpython$(VER)dmu.so.1.0 $(d_dbg)/usr/lib/
-	ln -sf libpython$(VER)dmu.so.1.0 $(d_dbg)/usr/lib/libpython$(VER)dmu.so.1
-	ln -sf libpython$(VER)dmu.so.1 $(d_dbg)/usr/lib/libpython$(VER)dmu.so
-	sed -e '/^Libs:/s,-lpython$(VER),-lpython$(VER)dmu,' \
+	cp -p $(buildd_shdebug)/libpython$(VER)$(DEBUG_ABIFLAGS).so.1.0 $(d_dbg)/usr/lib/
+	ln -sf libpython$(VER)$(DEBUG_ABIFLAGS).so.1.0 $(d_dbg)/usr/lib/libpython$(VER)$(DEBUG_ABIFLAGS).so.1
+	ln -sf libpython$(VER)$(DEBUG_ABIFLAGS).so.1 $(d_dbg)/usr/lib/libpython$(VER)$(DEBUG_ABIFLAGS).so
+	sed -e '/^Libs:/s,-lpython$(VER),-lpython$(VER)$(DEBUG_ABIFLAGS),' \
 	  -e '/^Cflags:/s,python$(VER),python$(VER)_d,' \
 	  $(d)-dbg/usr/lib/pkgconfig/python-$(VER).pc \
 	  > $(d_dbg)/usr/lib/pkgconfig/python-$(VER)-dbg.pc
@@ -901,25 +904,25 @@ endif
 	rm -f $(d_dbg)/$(scriptdir)/lib-dynload/_gdbm*.so
 	rm -f $(d_dbg)/usr/lib/debug/$(scriptdir)/lib-dynload/_gdbm*.so
 
-	cp -a $(d)-dbg/$(scriptdir)/config-$(VER)dmu $(d_dbg)/$(scriptdir)/
-	ln -sf ../../libpython$(VER)dmu.so \
-		$(d_dbg)/$(scriptdir)/config-$(VER)dmu/libpython$(VER)dmu.so
-	ln -sf libpython$(VER)dmu.so \
-		$(d_dbg)/$(scriptdir)/config-$(VER)dmu/libpython$(VER).so
-	ln -sf libpython$(VER)dmu.a \
-		$(d_dbg)/$(scriptdir)/config-$(VER)dmu/libpython$(VER).a
+	cp -a $(d)-dbg/$(scriptdir)/config-$(VER)$(DEBUG_ABIFLAGS) $(d_dbg)/$(scriptdir)/
+	ln -sf ../../libpython$(VER)$(DEBUG_ABIFLAGS).so \
+		$(d_dbg)/$(scriptdir)/config-$(VER)$(DEBUG_ABIFLAGS)/libpython$(VER)$(DEBUG_ABIFLAGS).so
+	ln -sf libpython$(VER)$(DEBUG_ABIFLAGS).so \
+		$(d_dbg)/$(scriptdir)/config-$(VER)$(DEBUG_ABIFLAGS)/libpython$(VER).so
+	ln -sf libpython$(VER)$(DEBUG_ABIFLAGS).a \
+		$(d_dbg)/$(scriptdir)/config-$(VER)$(DEBUG_ABIFLAGS)/libpython$(VER).a
 
-	for i in $(d_dev)/usr/include/$(PVER)mu/*; do \
+	for i in $(d_dev)/usr/include/$(PVER)$(ABIFLAGS)/*; do \
 	  i=$$(basename $$i); \
 	  case $$i in pyconfig.h) continue; esac; \
-	  ln -sf ../$(PVER)mu/$$i $(d_dbg)/usr/include/$(PVER)dmu/$$i; \
+	  ln -sf ../$(PVER)$(ABIFLAGS)/$$i $(d_dbg)/usr/include/$(PVER)$(DEBUG_ABIFLAGS)/$$i; \
 	done
-	cp -p $(buildd_debug)/pyconfig.h $(d_dbg)/usr/include/$(PVER)dmu/
+	cp -p $(buildd_debug)/pyconfig.h $(d_dbg)/usr/include/$(PVER)$(DEBUG_ABIFLAGS)/
 	ln -sf $(PVER).1.gz $(d_dbg)/usr/share/man/man1/$(PVER)-dbg.1.gz
 
 	: # symlinks for the "old" include / config directory names
-	ln -sf python$(VER)dmu $(d_dbg)/usr/include/python$(VER)_d
-	ln -sf config-$(VER)dmu $(d_dbg)/$(scriptdir)/config_d
+	ln -sf python$(VER)$(DEBUG_ABIFLAGS) $(d_dbg)/usr/include/python$(VER)_d
+	ln -sf config-$(VER)$(DEBUG_ABIFLAGS) $(d_dbg)/$(scriptdir)/config_d
 
 	for i in debian/*.overrides; do \
 	  b=$$(basename $$i .overrides); \
@@ -1003,12 +1006,12 @@ else
 endif
 
 	dh_strip -a -N$(p_dbg) -N$(p_tk) -N$(p_gdbm) -Xdebug -Xdbg --dbg-package=$(p_dbg)
-	cp Tools/gdb/libpython.py $(d_dbg)/usr/lib/debug/usr/bin/$(PVER)mu-gdb.py
+	cp Tools/gdb/libpython.py $(d_dbg)/usr/lib/debug/usr/bin/$(PVER)$(ABIFLAGS)-gdb.py
 	ln -sf $(PVER)-gdb.py $(d_dbg)/usr/lib/debug/usr/bin/$(PVER)-dbg-gdb.py
-	ln -sf ../bin/$(PVER)mu-gdb.py \
-		$(d_dbg)/usr/lib/debug/usr/lib/lib$(PVER)mu.so.1.0-gdb.py
-	ln -sf ../bin/$(PVER)mu-gdb.py \
-		$(d_dbg)/usr/lib/lib$(PVER)dmu.so.1.0-gdb.py
+	ln -sf ../bin/$(PVER)$(ABIFLAGS)-gdb.py \
+		$(d_dbg)/usr/lib/debug/usr/lib/lib$(PVER)$(ABIFLAGS).so.1.0-gdb.py
+	ln -sf ../bin/$(PVER)$(ABIFLAGS)-gdb.py \
+		$(d_dbg)/usr/lib/lib$(PVER)$(DEBUG_ABIFLAGS).so.1.0-gdb.py
 	dh_link -a
 	dh_compress -a -X.py
 	dh_fixperms -a
