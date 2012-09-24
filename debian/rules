@@ -9,17 +9,18 @@ export SHELL = /bin/bash
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
+# Preserve these generated files when cleaning so they're included in the source package
+PRESERVE_FILES := "debian/control:debian/source.lintian-overrides"
+
 DEB_BUILD_OPTIONS := "nocheck nobench"
 
-vafilt		= $(subst $(2)=,,$(filter $(2)=%,$(1)))
-DPKG_VARS	:= $(shell dpkg-architecture)
-DEB_HOST_ARCH		?= $(call vafilt,$(DPKG_VARS),DEB_HOST_ARCH)
-DEB_HOST_ARCH_OS	?= $(call vafilt,$(DPKG_VARS),DEB_HOST_ARCH_OS)
+DEB_HOST_ARCH		?= $(shell dpkg-architecture -qDEB_HOST_ARCH)
+DEB_HOST_ARCH_OS	?= $(shell dpkg-architecture -qDEB_HOST_ARCH_OS)
 
-CHANGELOG_VARS := $(shell dpkg-parsechangelog | \
-	sed -n 's/ /_/g;/^[^_]/s/^\([^:]*\):_\(.*\)/\1=\2/p')
-PKGSOURCE  := $(call vafilt,$(CHANGELOG_VARS),Source)
-PKGVERSION := $(call vafilt,$(CHANGELOG_VARS),Version)
+changelog_values := $(shell dpkg-parsechangelog \
+			| awk '/^(Version|Source):/ {print $$2}')
+PKGSOURCE  := $(word 1, $(changelog_values))
+PKGVERSION := $(word 2, $(changelog_values))
 
 on_buildd := $(shell [ -f /CurrentlyBuilding -o "$$LOGNAME" = buildd ] && echo yes)
 
@@ -48,7 +49,6 @@ endif
 distribution := Ubuntu-PPA
 
 export VER=3.2
-export SVER=3.2~a4
 export NVER=3.3
 export PVER=python3.2
 export PRIORITY=$(shell echo $(VER) | tr -d '.')0
@@ -92,17 +92,16 @@ PY_INTERPRETER = /usr/bin/python$(VER)
 ifeq ($(DEFAULT_VERSION),yes)
   PY_PRIO = standard
   #PYSTDDEP = , python (>= $(VER))
+  ifeq ($(distribution),Ubuntu)
+    PY_MINPRIO = required
+  else
+    PY_MINPRIO = $(PY_PRIO)
+  endif
 else
   PY_PRIO = optional
-endif
-ifeq ($(distribution),Ubuntu)
-  PY_MINPRIO = required
-  PY_MINPRIO = optional
-  with_fpectl = yes
-else
   PY_MINPRIO = $(PY_PRIO)
-  with_fpectl = yes
 endif
+with_fpectl = yes
 
 CC = gcc
 
@@ -131,9 +130,9 @@ p_base	:= $(PVER)
 p_min	:= $(PVER)-minimal
 p_lib	:= lib$(PVER)
 p_tk	:= $(PVER)-tk
-p_gdbm := $(PVER)-gdbm
-p_tk_dbg	:= $(PVER)-tk-dbg
-p_gdbm_dbg := $(PVER)-gdbm-dbg
+p_gdbm	:= $(PVER)-gdbm
+p_tk_dbg := $(p_tk)-dbg
+p_gdbm_dbg := $(p_gdbm)-dbg
 p_dev	:= $(PVER)-dev
 p_exam	:= $(PVER)-examples
 p_idle	:= idle-$(PVER)
@@ -144,8 +143,8 @@ d_base	:= debian/$(p_base)
 d_min	:= debian/$(p_min)
 d_lib	:= debian/$(p_lib)
 d_tk	:= debian/$(p_tk)
-d_gdbm := debian/$(p_gdbm)
-d_tk_dbg	:= debian/$(p_tk_dbg)
+d_gdbm	:= debian/$(p_gdbm)
+d_tk_dbg := debian/$(p_tk_dbg)
 d_gdbm_dbg := debian/$(p_gdbm_dbg)
 d_dev	:= debian/$(p_dev)
 d_exam	:= debian/$(p_exam)
@@ -161,7 +160,6 @@ endif
 ifeq ($(distribution),Debian)
   make_build_target =
 endif
-make_build_target = profile-opt
 
 build: $(build_target)
 build-all: build-arch build-indep
@@ -212,8 +210,7 @@ stamps/stamp-build-debug: stamps/stamp-configure-debug
 stamps/stamp-build-shared-debug: stamps/stamp-configure-shared-debug
 	dh_testdir
 	: # build the shared debug library
-# not building with $(NJOBS), see issue #4279
-	$(MAKE) -C $(buildd_shdebug) \
+	$(MAKE) $(NJOBS) -C $(buildd_shdebug) \
 		libpython$(VER)$(DEBUG_ABIFLAGS).so
 	touch stamps/stamp-build-shared-debug
 
@@ -222,16 +219,9 @@ common_configure_args = \
 		--enable-ipv6 \
 		--enable-loadable-sqlite-extensions \
 		--with-wide-unicode \
+		--with-dbmliborder=bdb:gdbm \
 		--with-computed-gotos \
 		--with-system-expat \
-
-ifeq ($(with_gdbm),yes)
-  common_configure_args += \
-		--with-dbmliborder=bdb:gdbm
-else
-  common_configure_args += \
-		--with-dbmliborder=bdb
-endif
 
 ifeq ($(DEB_HOST_ARCH), avr32)
   common_configure_args += --without-ffi
@@ -252,18 +242,17 @@ stamps/stamp-configure-shared: stamps/stamp-configure
 	    ../configure \
 		--enable-shared \
 		$(common_configure_args)
+	# Bake minimal extension modules into the interpreter.
 	egrep \
 	  "^#($$(awk '$$2 ~ /^extension$$/ {print $$1}' debian/PVER-minimal.README.Debian.in | tr '\012' '|')XX)" \
-	  Modules/Setup.dist \
-	    | sed -e 's/^#//' -e 's/-Wl,-Bdynamic//;s/-Wl,-Bstatic//' \
+	    Modules/Setup.dist \
+	  | sed -e 's/^#//' -e 's/-Wl,-Bdynamic//;s/-Wl,-Bstatic//' \
 	    >> $(buildd_shared)/Modules/Setup.local
 	cd $(buildd_shared) && \
 	  ../Modules/makesetup -c ../Modules/config.c.in -s Modules \
 	    Modules/Setup.config Modules/Setup.local Modules/Setup
 	mv $(buildd_shared)/config.c $(buildd_shared)/Modules/
 
-	@echo XXXXXXX pyconfig.h
-	-cat $(buildd_shared)/pyconfig.h
 	touch stamps/stamp-configure-shared
 
 stamps/stamp-configure-static: stamps/stamp-configure
@@ -274,6 +263,7 @@ stamps/stamp-configure-static: stamps/stamp-configure
 	  CC="$(CC)" $(OPTSETTINGS) \
 	    ../configure \
 		$(common_configure_args)
+	# Bake minimal extension modules into the interpreter.
 	egrep \
 	  "^#($$(awk '$$2 ~ /^extension$$/ {print $$1}' debian/PVER-minimal.README.Debian.in | tr '\012' '|')XX)" \
 	  Modules/Setup.dist | sed 's/^#//' \
@@ -299,6 +289,7 @@ stamps/stamp-configure-debug: stamps/stamp-configure
 	    ../configure \
 		$(common_configure_args) \
 		--with-pydebug
+	# Bake minimal extension modules into the interpreter.
 	egrep \
 	  "^#($$(awk '$$2 ~ /^extension$$/ {print $$1}' debian/PVER-minimal.README.Debian.in | tr '\012' '|')XX)" \
 	  Modules/Setup.dist | sed 's/^#//' \
@@ -325,6 +316,7 @@ stamps/stamp-configure-shared-debug: stamps/stamp-configure
 		$(common_configure_args) \
 		--enable-shared \
 		--with-pydebug
+	# Bake minimal extension modules into the interpreter.
 	egrep \
 	  "^#($$(awk '$$2 ~ /^extension$$/ {print $$1}' debian/PVER-minimal.README.Debian.in | tr '\012' '|')XX)" \
 	  Modules/Setup.dist \
@@ -392,9 +384,6 @@ endif
 ifneq (,$(filter $(DEB_HOST_ARCH), hurd-i386))
   TEST_EXCLUDES += test_imaplib test_io test_logging test_random test_signal test_socket test_socketserver test_ssl test_threading
 endif
-# issues with 3.2~a4
-TEST_EXCLUDES += test_sysconfig
-
 ifneq (,$(TEST_EXCLUDES))
   TESTOPTS += -x $(sort $(TEST_EXCLUDES))
 endif
@@ -501,6 +490,7 @@ minimal-test:
 		mintest/lib/
 	cp -a $(foreach i,$(MIN_PACKAGES),Lib/$(i)) \
 		mintest/lib/
+	: # Don't install minimal extensions since those have been built statically.
 #	cp -p $(foreach i,$(MIN_EXTS),$(buildd_static)/build/lib*/$(i).so) \
 #		mintest/dynlib/
 	cp -p Lib/unittest.py mintest/lib/
@@ -548,9 +538,24 @@ endif
 	  && rm -f debian/control.tmp && exit 0; \
 	  mv debian/control.tmp debian/control
 
+generated-files: control-file
+	: # We have to prepare the various control files
 
+	for f in debian/*.in; do \
+	  f2=`echo $$f | sed "s,PVER,$(PVER),g;s/@VER@/$(VER)/g;s,\.in$$,,"`; \
+	  if [ $$f2 != debian/control ]; then \
+	    sed -e "s/@PVER@/$(PVER)/g;s/@VER@/$(VER)/g" \
+		    -e "s/@PRIORITY@/$(PRIORITY)/g" \
+		    -e "s,@SCRIPTDIR@,/$(scriptdir),g" \
+		    -e "s,@INFO@,$(info_docs),g" \
+		  <$$f >$$f2; \
+	  fi; \
+	done
 
-clean: control-file
+stamps/stamp-control: generated-files
+	touch stamps/stamp-control
+
+clean: generated-files
 	dh_testdir
 	dh_testroot
 	rm -rf stamps
@@ -566,31 +571,17 @@ clean: control-file
 
 	for f in debian/*.in; do \
 	  f2=`echo $$f | sed "s,PVER,$(PVER),g;s/@VER@/$(VER)/g;s,\.in$$,,"`; \
-	  if [ $$f2 != debian/control ]; then \
+	  if [[ "$(PRESERVE_FILES)" != *"$$f2"* ]]; then \
 	    rm -f $$f2; \
 	  fi; \
 	done
 	dh_clean
 
-stamps/stamp-control:
-	: # We have to prepare the various control files
-
-	for f in debian/*.in; do \
-	  f2=`echo $$f | sed "s,PVER,$(PVER),g;s/@VER@/$(VER)/g;s,\.in$$,,"`; \
-	  if [ $$f2 != debian/control ]; then \
-	    sed -e "s/@PVER@/$(PVER)/g;s/@VER@/$(VER)/g;s/@SVER@/$(SVER)/g" \
-		    -e "s/@PRIORITY@/$(PRIORITY)/g" \
-		    -e "s,@SCRIPTDIR@,/$(scriptdir),g" \
-		    -e "s,@INFO@,$(info_docs),g" \
-		  <$$f >$$f2; \
-	  fi; \
-	done
-
 install: $(build_target) stamps/stamp-install
 stamps/stamp-install: stamps/stamp-build control-file stamps/stamp-control
 	dh_testdir
 	dh_testroot
-	dh_clean -k
+	dh_prep
 	dh_installdirs
 
 	: # make install into tmp and subsequently move the files into
@@ -610,17 +601,11 @@ endif
 	rm -f $(d)/usr/lib/python3/dist-packages/README
 
 	: # remove files which are not packaged
+	rm -f $(d)/usr/bin/smtpd.py
 	rm -rf $(d)/usr/lib/python$(VER)/ctypes/macholib
 
 	: # fix some file permissions
 	chmod a-x $(d)/$(scriptdir)/{runpy,fractions,lib2to3/refactor,tkinter/tix}.py
-
-#	: # move manpages to new names
-#	if [ -d $(d)/usr/man/man1 ]; then \
-#	    mkdir -p $(d)/usr/share/man
-#	    mv $(d)/usr/man/man1/* $(d)/usr/share/man/man1/; \
-#	    rm -rf $(d)/usr/man/; \
-#	fi
 
 	mkdir -p $(d)/usr/share/man/man1
 	cp -p Misc/python.man $(d)/usr/share/man/man1/python$(VER).1
@@ -669,23 +654,20 @@ endif
 	dh_installdirs -p$(p_min) \
 		etc/$(PVER) \
 		usr/bin \
+		usr/include/$(PVER)$(ABIFLAGS) \
 		usr/share/man/man1 \
 		$(scriptdir)/lib-dynload \
-		$(scriptdir)/config-$(VER)$(ABIFLAGS) \
-		usr/include/python$(VER)$(ABIFLAGS)
+		$(scriptdir)/config-$(VER)$(ABIFLAGS)
 	DH_COMPAT=2 dh_movefiles -p$(p_min) --sourcedir=$(d) \
 		usr/bin/python$(VER) \
 		usr/bin/python$(VER)$(ABIFLAGS) \
 		usr/share/man/man1/python$(VER).1 \
+		usr/include/$(PVER)$(ABIFLAGS)/pyconfig.h \
 		$(foreach i,$(MIN_MODS),$(scriptdir)/$(i).py) \
 		$(foreach i,$(MIN_PACKAGES),$(scriptdir)/$(i)) \
 		$(foreach i,$(MIN_ENCODINGS),$(scriptdir)/$(i)) \
 		$(scriptdir)/config-$(VER)$(ABIFLAGS)/Makefile \
-		$(scriptdir)/site.py \
-		usr/include/python$(VER)$(ABIFLAGS)/pyconfig.h
-
-#		$(foreach i,$(MIN_EXTS),$(scriptdir)/lib-dynload/$(i).so) \
-#		usr/share/man/man1/python$(VER).1 \
+		$(scriptdir)/site.py
 
 	ln -sf python$(VER)$(ABIFLAGS) $(d_min)/usr/bin/python$(VER)
 	: # symlinks for the "old" config directory name
@@ -709,13 +691,13 @@ endif
 #	mv $(d)/usr/share/include/python$(VER)/* $(d)/usr/include/python$(VER)/.
 #	rm -rf $(d)/usr/share/include
 	dh_installdirs -p$(p_dev) \
+		usr/bin \
 		usr/share/doc/python$(VER) \
 		$(scriptdir) \
 		$(scriptdir)/doc/html \
 		usr/include \
 		usr/lib
 	cp -p Misc/HISTORY Misc/README.valgrind Misc/gdbinit \
-		debian/README.maintainers \
 		debian/test_results $(buildd_static)/pybench.log \
 	    $(d_dev)/usr/share/doc/python$(VER)/
 
@@ -726,10 +708,11 @@ endif
 		usr/lib/pkgconfig/python-$(VER)*.pc \
 		usr/bin/python$(VER)*-config \
 		usr/lib/python$(VER)/distutils/command/wininst-*.exe
+	mv $(d)/usr/lib/libpython$(VER)$(ABIFLAGS).a $(d_dev)/usr/lib/$(PVER)/config-$(VER)$(ABIFLAGS)/
 
-	rm $(d)/usr/lib/libpython$(VER)$(ABIFLAGS).a
 	dh_link -p$(p_dev) usr/lib/python$(VER)/config-$(VER)$(ABIFLAGS)/libpython$(VER)$(ABIFLAGS).a \
 		usr/lib/libpython$(VER)$(ABIFLAGS).a
+
 	cp -p $(buildd_shared)/libpython$(VER)$(ABIFLAGS)-pic.a \
 		$(d_dev)/usr/lib/python$(VER)/config-$(VER)$(ABIFLAGS)/
 
@@ -821,18 +804,13 @@ endif
 		$(d_idle)/usr/share/applications/idle-$(PVER).desktop
 
 	: # those packages have own README.Debian's
-	install -m 644 -p debian/README.$(p_base) \
-		$(d_base)/usr/share/doc/$(PVER)/README.Debian
 	install -m 644 -p debian/README.$(p_idle) \
 		$(d_idle)/usr/share/doc/$(p_idle)/README.Debian
-ifeq ($(with_tk),yes)
-	cp -p debian/README.Tk $(d_tk)/usr/share/doc/$(p_tk)/
-endif
 
 	: # The rest goes into $(p_base)
-	mkdir -p $(d)/usr/lib/python3/dist-packages
 	(cd $(d) && tar cf - .) | (cd $(d_base) && tar xpf -)
 	rm -f $(d_base)/usr/bin/python
+	dh_installdirs -p$(p_base) usr/lib/python3/dist-packages
 
 	: # Install menu icon
 	dh_installdirs -p$(p_base) usr/share/pixmaps
@@ -871,6 +849,7 @@ endif
 		$(d_dbg)/usr/share/doc/$(p_base)/README.debug
 	cp -p $(buildd_debug)/python $(d_dbg)/usr/bin/$(PVER)$(DEBUG_ABIFLAGS)
 	ln -sf python$(VER)$(DEBUG_ABIFLAGS) $(d_dbg)/usr/bin/$(PVER)-dbg
+	: # create $(PVER)-dbg-config from regular $(PVER)-config
 	sed '1s,#!.*python[^ ]*\(.*\),#! $(PY_INTERPRETER)-dbg\1,' \
 		$(d)-dbg/usr/bin/$(PVER)-config \
 		> $(d_dbg)/usr/bin/$(PVER)$(DEBUG_ABIFLAGS)-config
