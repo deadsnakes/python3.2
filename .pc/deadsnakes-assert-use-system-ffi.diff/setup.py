@@ -1775,10 +1775,6 @@ class PyBuildExt(build_ext):
             ext.libraries.append(ffi_lib)
             self.use_system_libffi = True
 
-        if not self.use_system_libffi:
-            print("Error: not using system libffi", file=sys.stderr)
-            sys.exit(1)
-
 
 class PyBuildInstall(install):
     # Suppress the warning about installation into the lib_dynload

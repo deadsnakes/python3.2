@@ -29,3 +29,4 @@ disable-sem-check.diff
 lib-argparse.diff
 deadsnakes-ncursesw-include-dir.diff
 deadsnakes-libdb-versions.diff
+deadsnakes-assert-use-system-ffi.diff
