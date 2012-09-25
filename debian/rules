@@ -863,7 +863,8 @@ endif
 	sed -e '/^Libs:/s,-lpython$(VER),-lpython$(VER)$(DEBUG_ABIFLAGS),' \
 	  -e '/^Cflags:/s,python$(VER),python$(VER)_d,' \
 	  $(d)-dbg/usr/lib/pkgconfig/python-$(VER).pc \
-	  > $(d_dbg)/usr/lib/pkgconfig/python-$(VER)-dbg.pc
+	  > $(d_dbg)/usr/lib/pkgconfig/python-$(VER)$(DEBUG_ABIFLAGS).pc
+	ln -sf python-$(VER)$(DEBUG_ABIFLAGS).pc $(d_dbg)/usr/lib/pkgconfig/python-$(VER)-dbg.pc
 
 ifeq ($(with_tk),yes)
 	# move debug files to corresponding debug package
@@ -986,11 +987,11 @@ endif
 
 	dh_strip -a -N$(p_dbg) -N$(p_tk) -N$(p_gdbm) -Xdebug -Xdbg --dbg-package=$(p_dbg)
 	cp Tools/gdb/libpython.py $(d_dbg)/usr/lib/debug/usr/bin/$(PVER)$(ABIFLAGS)-gdb.py
-	ln -sf $(PVER)-gdb.py $(d_dbg)/usr/lib/debug/usr/bin/$(PVER)-dbg-gdb.py
+	ln -sf $(PVER)$(ABIFLAGS)-gdb.py $(d_dbg)/usr/lib/debug/usr/bin/$(PVER)$(DEBUG_ABIFLAGS)-gdb.py
 	ln -sf ../bin/$(PVER)$(ABIFLAGS)-gdb.py \
 		$(d_dbg)/usr/lib/debug/usr/lib/lib$(PVER)$(ABIFLAGS).so.1.0-gdb.py
 	ln -sf ../bin/$(PVER)$(ABIFLAGS)-gdb.py \
-		$(d_dbg)/usr/lib/lib$(PVER)$(DEBUG_ABIFLAGS).so.1.0-gdb.py
+		$(d_dbg)/usr/lib/debug/usr/lib/lib$(PVER)$(DEBUG_ABIFLAGS).so.1.0-gdb.py
 	dh_link -a
 	dh_compress -a -X.py
 	dh_fixperms -a
