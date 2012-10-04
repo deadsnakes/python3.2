@@ -3,7 +3,7 @@ Section: python
 Priority: optional
 Maintainer: Felix Krull <f_krull@gmx.de>
 XSBC-Original-Maintainer: Matthias Klose <doko@debian.org>
-Build-Depends: debhelper (>= 5), autoconf,
+Build-Depends: debhelper (>= 7), autoconf,
    mime-support, netbase, lsb-release, bzip2,
    zlib1g-dev, libbz2-dev, libdb-dev, libssl-dev, libreadline-dev, libexpat1-dev,
    libncursesw5-dev (>= 5.3), tk8.5-dev, blt-dev (>= 2.4z), libgpm2 [!hurd-i386 !kfreebsd-i386 !kfreebsd-amd64],
@@ -27,7 +27,7 @@ Depends: python3.2-minimal (= ${binary:Version}), mime-support, ${shlibs:Depends
 Suggests: python3.2-doc, binutils
 Provides: python3.2-cjkcodecs, python3.2-ctypes, python3.2-elementtree, python3.2-celementtree, python3.2-wsgiref, python3.2-profiler
 XB-Python-Version: 3.2
-Description: An interactive high-level object-oriented language (version 3.2)
+Description: Interactive high-level object-oriented language (version 3.2)
  Version 3.2 of the high-level, interactive object oriented language,
  includes an extensive class library with lots of goodies for
  network programming, system administration, sounds and graphics.
@@ -41,7 +41,7 @@ Suggests: binfmt-support
 Conflicts: binfmt-support (<< 1.1.2)
 XB-Python-Runtime: python3.2
 XB-Python-Version: 3.2
-Description: A minimal subset of the Python language (version 3.2)
+Description: Minimal subset of the Python language (version 3.2)
  This package contains the interpreter and some essential modules.  It can
  be used in the boot process for some basic tasks.
  See /usr/share/doc/python3.2-minimal/README.Debian for a list of the modules
@@ -83,7 +83,7 @@ Architecture: all
 Depends: python3.2, python3.2-tk, ${misc:Depends}
 Enhances: python3.2
 XB-Python-Version: 3.2
-Description: An IDE for Python (version 3.2) using Tkinter
+Description: IDE for Python (version 3.2) using Tkinter
  IDLE is an Integrated Development Environment for Python (version 3.2).
  IDLE is written using Tkinter and therefore quite platform-independent.
 
@@ -125,8 +125,8 @@ Provides: ${python:Provides}
 Suggests: tix, python3.2-tk-dbg
 XB-Python-Version: ${python:Versions}
 Description: Tkinter - Writing Tk applications with Python (version 3.2)
- A module for writing portable GUI applications with Python (version 3.2) using Tk.
- Also known as Tkinter.
+ A module for writing portable GUI applications with Python (version 3.2)
+ using Tk. Also known as Tkinter.
 
 Package: python3.2-gdbm
 Architecture: any
@@ -144,8 +144,8 @@ Priority: extra
 Section: debug
 Depends: python3.2, ${python:Depends}, python3.2-tk (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
 Description: Tkinter - Writing Tk applications with Python (version 3.2 debug extension)
- A module for writing portable GUI applications with Python (version 3.2) using Tk.
- Also known as Tkinter.
+ A module for writing portable GUI applications with Python (version 3.2)
+ using Tk. Also known as Tkinter.
  .
  This package contains the extensions built for the python debug interpreter.
 
@@ -179,7 +179,7 @@ Depends:
  python3.2-gdbm-dbg (>= ${binary:Version}),
  ${shlibs:Depends}, ${misc:Depends}
 XB-Python-Version: 3.2
-Description: An interactive high-level object-oriented language (version 3.2)
+Description: Interactive high-level object-oriented language (version 3.2)
  Version 3.2 of the high-level, interactive object oriented language,
  includes an extensive class library with lots of goodies for
  network programming, system administration, sounds and graphics.
