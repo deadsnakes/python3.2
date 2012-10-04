@@ -166,7 +166,6 @@ Architecture: all
 Priority: extra
 Depends:
  python3.2 (>= ${binary:Version}),
- python3.2-minimal (>= ${binary:Version}),
  libpython3.2 (>= ${binary:Version}),
  python3.2-examples (>= ${binary:Version}),
  python3.2-dev (>= ${binary:Version}),

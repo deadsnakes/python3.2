@@ -166,7 +166,6 @@ Architecture: all
 Priority: extra
 Depends:
  @PVER@ (>= ${binary:Version}),
- @PVER@-minimal (>= ${binary:Version}),
  lib@PVER@ (>= ${binary:Version}),
  @PVER@-examples (>= ${binary:Version}),
  @PVER@-dev (>= ${binary:Version}),
