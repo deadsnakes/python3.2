@@ -2,8 +2,9 @@ python3.2 (3.2.3-2+lucid1) lucid; urgency=low
 
   * Guarantee ctypes is built against system libffi.
   * Fix installation locations of some debug files.
+  * Have -complete not depend on -minimal.
 
- -- Felix Krull <f_krull@gmx.de>  Thu, 04 Oct 2012 21:07:38 +0200
+ -- Felix Krull <f_krull@gmx.de>  Fri, 05 Oct 2012 00:56:10 +0200
 
 python3.2 (3.2.3-1+lucid1) lucid; urgency=low
 
