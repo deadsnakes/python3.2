@@ -9,3 +9,5 @@
 
 # license file referred by the standard library
 @PVER@ binary: extra-license-file
+
+@PVER@ binary: binary-without-manpage usr/bin/2to3-@VER@

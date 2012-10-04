@@ -1,0 +1,5 @@
+@PVER@-dbg binary: package-name-doesnt-match-sonames
+@PVER@-dbg binary: non-dev-pkg-with-shlib-symlink
+@PVER@-dbg binary: python-script-but-no-python-dep
+@PVER@-dbg: unusual-interpreter usr/bin/@PVER@dmu-config #!/usr/bin/@PVER@dmu
+@PVER@-dbg: binary-without-manpage usr/bin/@PVER@*

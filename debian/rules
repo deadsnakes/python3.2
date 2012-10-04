@@ -904,11 +904,6 @@ endif
 	ln -sf python$(VER)$(DEBUG_ABIFLAGS) $(d_dbg)/usr/include/python$(VER)_d
 	ln -sf config-$(VER)$(DEBUG_ABIFLAGS) $(d_dbg)/$(scriptdir)/config_d
 
-	for i in debian/*.overrides; do \
-	  b=$$(basename $$i .overrides); \
-	  install -D -m 644 $$i debian/$$b/usr/share/lintian/overrides/$$b; \
-	done
-
 	touch stamps/stamp-install
 
 # Build architecture-independent files here.
@@ -953,6 +948,7 @@ binary-indep: $(install_target) $(build_target) stamps/stamp-build-doc stamps/st
 	done
 	-find $(d_doc) -name '*.txt' -perm 755 -exec chmod 644 {} \;
 
+	dh_lintian -i $(dh_args)
 	dh_installdeb -i $(dh_args)
 	dh_gencontrol -i $(dh_args)
 	dh_md5sums -i $(dh_args)
@@ -1013,6 +1009,7 @@ endif
 	  -e '/^ (PyExpat_XML_|PyExpat_Xml)/d' \
 	  -e '/^ (ffi_type_|_ctypes_)/d' \
 	    $(d_lib)/DEBIAN/symbols $(d_dbg)/DEBIAN/symbols
+	dh_lintian -a
 	dh_installdeb -a
 	dh_shlibdeps -a
 	dh_gencontrol -a
