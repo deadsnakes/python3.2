@@ -760,9 +760,11 @@ endif
 	rm -f $(d)/usr/lib/python$(VER)/idlelib/idle.bat
 	dh_installdirs -p$(p_idle) \
 		usr/bin \
+		usr/lib/$(PVER) \
 		usr/share/man/man1
 	DH_COMPAT=2 dh_movefiles -p$(p_idle) \
-		usr/bin/idle-python$(VER)
+		usr/bin/idle-python$(VER) \
+		usr/lib/$(PVER)/idlelib
 	cp -p debian/idle-$(PVER).1 $(d_idle)/usr/share/man/man1/
 
 	: # Move the demos and tools into $(p_exam)'s doc directory
