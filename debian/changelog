@@ -4,8 +4,9 @@ python3.2 (3.2.3-2+lucid1) lucid; urgency=low
   * Fix installation locations of some debug files.
   * Have -complete not depend on -minimal.
   * Move idlelib package to idle-python3.2 package.
+  * Never add rpath to binaries.
 
- -- Felix Krull <f_krull@gmx.de>  Fri, 05 Oct 2012 22:00:29 +0200
+ -- Felix Krull <f_krull@gmx.de>  Sat, 06 Oct 2012 22:36:13 +0200
 
 python3.2 (3.2.3-1+lucid1) lucid; urgency=low
 
