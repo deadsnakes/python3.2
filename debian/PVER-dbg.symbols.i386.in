@@ -1,4 +1,4 @@
-libpython@VER@dmu.so.1.0 python@VER@-dbg #MINVER#
+libpython@VER@@DEBUG_ABIFLAGS@.so.1.0 python@VER@-dbg #MINVER#
 #include "libpython.symbols"
  _Py_force_double@Base @VER@
  _Py_get_387controlword@Base @VER@

@@ -548,6 +548,8 @@ generated-files: control-file
 		    -e "s/@PRIORITY@/$(PRIORITY)/g" \
 		    -e "s,@SCRIPTDIR@,/$(scriptdir),g" \
 		    -e "s,@INFO@,$(info_docs),g" \
+		    -e "s/@ABIFLAGS@/$(ABIFLAGS)/g" \
+		    -e "s/@DEBUG_ABIFLAGS@/$(DEBUG_ABIFLAGS)/g" \
 		  <$$f >$$f2; \
 	  fi; \
 	done

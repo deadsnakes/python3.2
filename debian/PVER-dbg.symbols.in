@@ -1,4 +1,4 @@
-libpython@VER@dmu.so.1.0 python@VER@-dbg #MINVER#
+libpython@VER@@DEBUG_ABIFLAGS@.so.1.0 python@VER@-dbg #MINVER#
 #include "libpython.symbols"
  _PyDict_Dummy@Base @VER@
  _PyMem_DebugFree@Base @VER@

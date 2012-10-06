@@ -1,4 +1,4 @@
-libpython@VER@mu.so.1.0 libpython@VER@ #MINVER#
+libpython@VER@@ABIFLAGS@.so.1.0 libpython@VER@ #MINVER#
 #include "libpython.symbols"
  PyModule_Create2@Base @VER@
  _Py_force_double@Base @VER@
