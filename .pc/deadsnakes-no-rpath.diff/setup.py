@@ -1052,7 +1052,7 @@ class PyBuildExt(build_ext):
                                   include_dirs=["Modules/_sqlite",
                                                 sqlite_incdir],
                                   library_dirs=sqlite_libdir,
-                                  #runtime_library_dirs=sqlite_libdir,
+                                  runtime_library_dirs=sqlite_libdir,
                                   extra_link_args=sqlite_extra_link_args,
                                   libraries=["sqlite3",]))
         else:
@@ -1116,7 +1116,7 @@ class PyBuildExt(build_ext):
                         print("building dbm using bdb")
                         dbmext = Extension('_dbm', ['_dbmmodule.c'],
                                            library_dirs=dblib_dir,
-                                           #runtime_library_dirs=dblib_dir,
+                                           runtime_library_dirs=dblib_dir,
                                            include_dirs=db_incs,
                                            define_macros=[
                                                ('HAVE_BERKDB_H', None),

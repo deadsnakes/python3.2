@@ -31,3 +31,4 @@ deadsnakes-ncursesw-include-dir.diff
 deadsnakes-libdb-versions.diff
 deadsnakes-assert-use-system-ffi.diff
 deadsnakes-fix-libffi-header-search-path.diff
+deadsnakes-no-rpath.diff
