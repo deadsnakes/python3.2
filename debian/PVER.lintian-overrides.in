@@ -1,6 +1,3 @@
-# idlelib images
-@PVER@ binary: image-file-in-usr-lib
-
 # yes, we have to
 @PVER@ binary: depends-on-python-minimal
 
