@@ -469,8 +469,9 @@ PyObject *PyBytes_DecodeEscape(const char *s,
                 break;
             }
             if (!errors || strcmp(errors, "strict") == 0) {
-                PyErr_SetString(PyExc_ValueError,
-                                "invalid \\x escape");
+                PyErr_Format(PyExc_ValueError,
+                             "invalid \\x escape at position %d",
+                              s - 2 - (end - len));
                 goto failed;
             }
             if (strcmp(errors, "replace") == 0) {
@@ -484,6 +485,10 @@ PyObject *PyBytes_DecodeEscape(const char *s,
                              errors);
                 goto failed;
             }
+            /* skip \x */
+            if (s < end && Py_ISXDIGIT(s[0]))
+                s++; /* and a hexdigit */
+            break;
         default:
             *p++ = '\\';
             s--;
@@ -873,9 +878,11 @@ bytes_hash(PyBytesObject *a)
 {
     register Py_ssize_t len;
     register unsigned char *p;
-    register Py_hash_t x;
+    register Py_uhash_t x;  /* Unsigned for defined overflow behavior. */
 
+#ifdef Py_DEBUG
     assert(_Py_HashSecret_Initialized);
+#endif
     if (a->ob_shash != -1)
         return a->ob_shash;
     len = Py_SIZE(a);
@@ -2794,8 +2801,7 @@ PyBytes_Concat(register PyObject **pv, register PyObject *w)
     if (*pv == NULL)
         return;
     if (w == NULL) {
-        Py_DECREF(*pv);
-        *pv = NULL;
+        Py_CLEAR(*pv);
         return;
     }
     v = bytes_concat(*pv, w);
@@ -3002,12 +3008,9 @@ void
 PyBytes_Fini(void)
 {
     int i;
-    for (i = 0; i < UCHAR_MAX + 1; i++) {
-        Py_XDECREF(characters[i]);
-        characters[i] = NULL;
-    }
-    Py_XDECREF(nullstring);
-    nullstring = NULL;
+    for (i = 0; i < UCHAR_MAX + 1; i++)
+        Py_CLEAR(characters[i]);
+    Py_CLEAR(nullstring);
 }
 
 /*********************** Bytes Iterator ****************************/

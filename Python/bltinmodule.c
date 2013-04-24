@@ -158,10 +158,8 @@ builtin___build_class__(PyObject *self, PyObject *args, PyObject *kwds)
             cls = PyEval_CallObjectWithKeywords(meta, margs, mkw);
             Py_DECREF(margs);
         }
-        if (cls != NULL && PyCell_Check(cell)) {
-            Py_INCREF(cls);
-            PyCell_SET(cell, cls);
-        }
+        if (cls != NULL && PyCell_Check(cell))
+            PyCell_Set(cell, cls);
         Py_DECREF(cell);
     }
     Py_DECREF(ns);
@@ -264,7 +262,8 @@ builtin_all(PyObject *self, PyObject *v)
 PyDoc_STRVAR(all_doc,
 "all(iterable) -> bool\n\
 \n\
-Return True if bool(x) is True for all values x in the iterable.");
+Return True if bool(x) is True for all values x in the iterable.\n\
+If the iterable is empty, return True.");
 
 static PyObject *
 builtin_any(PyObject *self, PyObject *v)
@@ -306,7 +305,8 @@ builtin_any(PyObject *self, PyObject *v)
 PyDoc_STRVAR(any_doc,
 "any(iterable) -> bool\n\
 \n\
-Return True if bool(x) is True for any x in the iterable.");
+Return True if bool(x) is True for any x in the iterable.\n\
+If the iterable is empty, return False.");
 
 static PyObject *
 builtin_ascii(PyObject *self, PyObject *v)
@@ -430,9 +430,11 @@ filter_next(filterobject *lz)
             ok = PyObject_IsTrue(good);
             Py_DECREF(good);
         }
-        if (ok)
+        if (ok > 0)
             return item;
         Py_DECREF(item);
+        if (ok < 0)
+            return NULL;
     }
 }
 
@@ -631,6 +633,8 @@ builtin_compile(PyObject *self, PyObject *args, PyObject *kwds)
             mod_ty mod;
 
             arena = PyArena_New();
+            if (arena == NULL)
+                goto error;
             mod = PyAST_obj2mod(cmd, arena, mode);
             if (mod == NULL) {
                 PyArena_Free(arena);
@@ -791,7 +795,6 @@ builtin_exec(PyObject *self, PyObject *args)
 {
     PyObject *v;
     PyObject *prog, *globals = Py_None, *locals = Py_None;
-    int plain = 0;
 
     if (!PyArg_UnpackTuple(args, "exec", 1, 3, &prog, &globals, &locals))
         return NULL;
@@ -800,7 +803,6 @@ builtin_exec(PyObject *self, PyObject *args)
         globals = PyEval_GetGlobals();
         if (locals == Py_None) {
             locals = PyEval_GetLocals();
-            plain = 1;
         }
         if (!globals || !locals) {
             PyErr_SetString(PyExc_SystemError,

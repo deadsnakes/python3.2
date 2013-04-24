@@ -993,7 +993,7 @@ AsObj(PyObject *value)
         for (i = 0; i < size; i++) {
             if (inbuf[i] >= 0x10000) {
                 /* Tcl doesn't do UTF-16, yet. */
-                PyErr_Format(PyExc_ValueError,
+                PyErr_Format(Tkinter_TclError,
                              "character U+%x is above the range "
                              "(U+0000-U+FFFF) allowed by Tcl",
                              inbuf[i]);
@@ -3135,8 +3135,10 @@ PyInit__tkinter(void)
 
     PyDict_SetItemString(d, "TkappType", (PyObject *)&Tkapp_Type);
 
-    if (PyType_Ready(&Tktt_Type) < 0)
+    if (PyType_Ready(&Tktt_Type) < 0) {
+        Py_DECREF(m);
         return NULL;
+    }
     PyDict_SetItemString(d, "TkttType", (PyObject *)&Tktt_Type);
 
     Py_TYPE(&PyTclObject_Type) = &PyType_Type;

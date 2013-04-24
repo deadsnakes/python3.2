@@ -340,11 +340,15 @@ type_set_abstractmethods(PyTypeObject *type, PyObject *value, void *context)
        abc.ABCMeta.__new__, so this function doesn't do anything
        special to update subclasses.
     */
-    int res;
+    int abstract, res;
     if (value != NULL) {
+        abstract = PyObject_IsTrue(value);
+        if (abstract < 0)
+            return -1;
         res = PyDict_SetItemString(type->tp_dict, "__abstractmethods__", value);
     }
     else {
+        abstract = 0;
         res = PyDict_DelItemString(type->tp_dict, "__abstractmethods__");
         if (res && PyErr_ExceptionMatches(PyExc_KeyError)) {
             PyErr_SetString(PyExc_AttributeError, "__abstractmethods__");
@@ -353,12 +357,10 @@ type_set_abstractmethods(PyTypeObject *type, PyObject *value, void *context)
     }
     if (res == 0) {
         PyType_Modified(type);
-        if (value && PyObject_IsTrue(value)) {
+        if (abstract)
             type->tp_flags |= Py_TPFLAGS_IS_ABSTRACT;
-        }
-        else {
+        else
             type->tp_flags &= ~Py_TPFLAGS_IS_ABSTRACT;
-        }
     }
     return res;
 }
@@ -458,26 +460,23 @@ type_set_bases(PyTypeObject *type, PyObject *value, void *context)
     for (i = 0; i < PyTuple_GET_SIZE(value); i++) {
         ob = PyTuple_GET_ITEM(value, i);
         if (!PyType_Check(ob)) {
-            PyErr_Format(
-                PyExc_TypeError,
-    "%s.__bases__ must be tuple of old- or new-style classes, not '%s'",
-                            type->tp_name, Py_TYPE(ob)->tp_name);
-                    return -1;
+            PyErr_Format(PyExc_TypeError,
+                         "%s.__bases__ must be tuple of old- or "
+                         "new-style classes, not '%s'",
+                         type->tp_name, Py_TYPE(ob)->tp_name);
+            return -1;
         }
-        if (PyType_Check(ob)) {
-            if (PyType_IsSubtype((PyTypeObject*)ob, type)) {
-                PyErr_SetString(PyExc_TypeError,
-            "a __bases__ item causes an inheritance cycle");
-                return -1;
-            }
+        if (PyType_IsSubtype((PyTypeObject*)ob, type)) {
+            PyErr_SetString(PyExc_TypeError,
+                            "a __bases__ item causes an inheritance cycle");
+            return -1;
         }
     }
 
     new_base = best_base(value);
 
-    if (!new_base) {
+    if (!new_base)
         return -1;
-    }
 
     if (!compatible_for_assignment(type->tp_base, new_base, "__bases__"))
         return -1;
@@ -648,8 +647,10 @@ type_repr(PyTypeObject *type)
         mod = NULL;
     }
     name = type_name(type, NULL);
-    if (name == NULL)
+    if (name == NULL) {
+        Py_XDECREF(mod);
         return NULL;
+    }
 
     if (mod != NULL && PyUnicode_CompareWithASCIIString(mod, "builtins"))
         rtn = PyUnicode_FromFormat("<class '%U.%U'>", mod, name);
@@ -830,8 +831,13 @@ subtype_clear(PyObject *self)
         assert(base);
     }
 
-    /* There's no need to clear the instance dict (if any);
-       the collector will call its tp_clear handler. */
+    /* Clear the instance dict (if any), to break cycles involving only
+       __dict__ slots (as in the case 'self.__dict__ is self'). */
+    if (type->tp_dictoffset != base->tp_dictoffset) {
+        PyObject **dictptr = _PyObject_GetDictPtr(self);
+        if (dictptr && *dictptr)
+            Py_CLEAR(*dictptr);
+    }
 
     if (baseclear)
         return baseclear(self);
@@ -843,6 +849,7 @@ subtype_dealloc(PyObject *self)
 {
     PyTypeObject *type, *base;
     destructor basedealloc;
+    PyThreadState *tstate = PyThreadState_GET();
 
     /* Extract the type; we expect it to be a heap type */
     type = Py_TYPE(self);
@@ -892,8 +899,10 @@ subtype_dealloc(PyObject *self)
     /* See explanation at end of function for full disclosure */
     PyObject_GC_UnTrack(self);
     ++_PyTrash_delete_nesting;
+    ++ tstate->trash_delete_nesting;
     Py_TRASHCAN_SAFE_BEGIN(self);
     --_PyTrash_delete_nesting;
+    -- tstate->trash_delete_nesting;
     /* DO NOT restore GC tracking at this point.  weakref callbacks
      * (if any, and whether directly here or indirectly in something we
      * call) may trigger GC, and if self is tracked at that point, it
@@ -972,8 +981,10 @@ subtype_dealloc(PyObject *self)
 
   endlabel:
     ++_PyTrash_delete_nesting;
+    ++ tstate->trash_delete_nesting;
     Py_TRASHCAN_SAFE_END(self);
     --_PyTrash_delete_nesting;
+    -- tstate->trash_delete_nesting;
 
     /* Explanation of the weirdness around the trashcan macros:
 
@@ -2358,32 +2369,38 @@ PyType_FromSpec(PyType_Spec *spec)
       return NULL;
     res->ht_name = PyUnicode_FromString(spec->name);
     if (!res->ht_name)
-	goto fail;
+        goto fail;
     res->ht_type.tp_name = _PyUnicode_AsString(res->ht_name);
     if (!res->ht_type.tp_name)
-	goto fail;
+        goto fail;
 
     res->ht_type.tp_basicsize = spec->basicsize;
     res->ht_type.tp_itemsize = spec->itemsize;
     res->ht_type.tp_flags = spec->flags | Py_TPFLAGS_HEAPTYPE;
 
     for (slot = spec->slots; slot->slot; slot++) {
-	if (slot->slot >= sizeof(slotoffsets)/sizeof(slotoffsets[0])) {
-	    PyErr_SetString(PyExc_RuntimeError, "invalid slot offset");
-	    goto fail;
-	}
-	*(void**)(res_start + slotoffsets[slot->slot]) = slot->pfunc;
+        if (slot->slot >= sizeof(slotoffsets)/sizeof(slotoffsets[0])) {
+            PyErr_SetString(PyExc_RuntimeError, "invalid slot offset");
+            goto fail;
+        }
+        *(void**)(res_start + slotoffsets[slot->slot]) = slot->pfunc;
 
         /* need to make a copy of the docstring slot, which usually
            points to a static string literal */
         if (slot->slot == Py_tp_doc) {
-            ssize_t len = strlen(slot->pfunc)+1;
+            size_t len = strlen(slot->pfunc)+1;
             char *tp_doc = PyObject_MALLOC(len);
             if (tp_doc == NULL)
-	    	goto fail;
+                goto fail;
             memcpy(tp_doc, slot->pfunc, len);
             res->ht_type.tp_doc = tp_doc;
         }
+    }
+    if (res->ht_type.tp_dealloc == NULL) {
+        /* It's a heap type, so needs the heap types' dealloc.
+           subtype_dealloc will call the base type's tp_dealloc, if
+           necessary. */
+        res->ht_type.tp_dealloc = subtype_dealloc;
     }
 
     if (PyType_Ready(&res->ht_type) < 0)
@@ -2456,6 +2473,13 @@ type_getattro(PyTypeObject *type, PyObject *name)
     PyTypeObject *metatype = Py_TYPE(type);
     PyObject *meta_attribute, *attribute;
     descrgetfunc meta_get;
+
+    if (!PyUnicode_Check(name)) {
+        PyErr_Format(PyExc_TypeError,
+                     "attribute name must be string, not '%.200s'",
+                     name->ob_type->tp_name);
+        return NULL;
+    }
 
     /* Initialize this type (we'll assume the metatype is initialized) */
     if (type->tp_dict == NULL) {
@@ -2818,14 +2842,14 @@ object_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
             type->tp_init != object_init)
         {
             err = PyErr_WarnEx(PyExc_DeprecationWarning,
-                       "object.__new__() takes no parameters",
+                       "object() takes no parameters",
                        1);
         }
         else if (type->tp_new != object_new ||
                  type->tp_init == object_init)
         {
             PyErr_SetString(PyExc_TypeError,
-                "object.__new__() takes no parameters");
+                "object() takes no parameters");
             err = -1;
         }
     }
@@ -2901,8 +2925,10 @@ object_repr(PyObject *self)
         mod = NULL;
     }
     name = type_name(type, NULL);
-    if (name == NULL)
+    if (name == NULL) {
+        Py_XDECREF(mod);
         return NULL;
+    }
     if (mod != NULL && PyUnicode_CompareWithASCIIString(mod, "builtins"))
         rtn = PyUnicode_FromFormat("<%U.%U object at %p>", mod, name, self);
     else
@@ -2919,7 +2945,7 @@ object_str(PyObject *self)
     unaryfunc f;
 
     f = Py_TYPE(self)->tp_repr;
-    if (f == NULL || f == object_str)
+    if (f == NULL)
         f = object_repr;
     return f(self);
 }
@@ -3518,6 +3544,7 @@ add_methods(PyTypeObject *type, PyMethodDef *meth)
 
     for (; meth->ml_name != NULL; meth++) {
         PyObject *descr;
+        int err;
         if (PyDict_GetItemString(dict, meth->ml_name) &&
             !(meth->ml_flags & METH_COEXIST))
                 continue;
@@ -3541,9 +3568,10 @@ add_methods(PyTypeObject *type, PyMethodDef *meth)
         }
         if (descr == NULL)
             return -1;
-        if (PyDict_SetItemString(dict, meth->ml_name, descr) < 0)
-            return -1;
+        err = PyDict_SetItemString(dict, meth->ml_name, descr);
         Py_DECREF(descr);
+        if (err < 0)
+            return -1;
     }
     return 0;
 }
@@ -5744,11 +5772,12 @@ update_one_slot(PyTypeObject *type, slotdef *p)
         descr = _PyType_Lookup(type, p->name_strobj);
         if (descr == NULL) {
             if (ptr == (void**)&type->tp_iternext) {
-                specific = _PyObject_NextNotImplemented;
+                specific = (void *)_PyObject_NextNotImplemented;
             }
             continue;
         }
-        if (Py_TYPE(descr) == &PyWrapperDescr_Type) {
+        if (Py_TYPE(descr) == &PyWrapperDescr_Type &&
+            ((PyWrapperDescrObject *)descr)->d_base->name_strobj == p->name_strobj) {
             void **tptr = resolve_slotdups(type, p->name_strobj);
             if (tptr == NULL || tptr == ptr)
                 generic = p->function;
@@ -5790,7 +5819,7 @@ update_one_slot(PyTypeObject *type, slotdef *p)
             /* We specifically allow __hash__ to be set to None
                to prevent inheritance of the default
                implementation from object.__hash__ */
-            specific = PyObject_HashNotImplemented;
+            specific = (void *)PyObject_HashNotImplemented;
         }
         else {
             use_generic = 1;
@@ -6005,7 +6034,7 @@ add_operators(PyTypeObject *type)
             continue;
         if (PyDict_GetItem(dict, p->name_strobj))
             continue;
-        if (*ptr == PyObject_HashNotImplemented) {
+        if (*ptr == (void *)PyObject_HashNotImplemented) {
             /* Classes may prevent the inheritance of the tp_hash
                slot by storing PyObject_HashNotImplemented in it. Make it
                visible as a None value for the __hash__ attribute. */

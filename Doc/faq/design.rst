@@ -43,56 +43,45 @@ Why am I getting strange results with simple arithmetic operations?
 See the next question.
 
 
-Why are floating point calculations so inaccurate?
+Why are floating-point calculations so inaccurate?
 --------------------------------------------------
 
-People are often very surprised by results like this::
+Users are often surprised by results like this::
 
-   >>> 1.2 - 1.0
-   0.199999999999999996
+    >>> 1.2 - 1.0
+    0.199999999999999996
 
-and think it is a bug in Python. It's not.  This has nothing to do with Python,
-but with how the underlying C platform handles floating point numbers, and
-ultimately with the inaccuracies introduced when writing down numbers as a
-string of a fixed number of digits.
+and think it is a bug in Python.  It's not.  This has little to do with Python,
+and much more to do with how the underlying platform handles floating-point
+numbers.
 
-The internal representation of floating point numbers uses a fixed number of
-binary digits to represent a decimal number.  Some decimal numbers can't be
-represented exactly in binary, resulting in small roundoff errors.
+The :class:`float` type in CPython uses a C ``double`` for storage.  A
+:class:`float` object's value is stored in binary floating-point with a fixed
+precision (typically 53 bits) and Python uses C operations, which in turn rely
+on the hardware implementation in the processor, to perform floating-point
+operations. This means that as far as floating-point operations are concerned,
+Python behaves like many popular languages including C and Java.
 
-In decimal math, there are many numbers that can't be represented with a fixed
-number of decimal digits, e.g.  1/3 = 0.3333333333.......
+Many numbers that can be written easily in decimal notation cannot be expressed
+exactly in binary floating-point.  For example, after::
 
-In base 2, 1/2 = 0.1, 1/4 = 0.01, 1/8 = 0.001, etc.  .2 equals 2/10 equals 1/5,
-resulting in the binary fractional number 0.001100110011001...
+    >>> x = 1.2
 
-Floating point numbers only have 32 or 64 bits of precision, so the digits are
-cut off at some point, and the resulting number is 0.199999999999999996 in
-decimal, not 0.2.
+the value stored for ``x`` is a (very good) approximation to the decimal value
+``1.2``, but is not exactly equal to it.  On a typical machine, the actual
+stored value is::
 
-A floating point number's ``repr()`` function prints as many digits are
-necessary to make ``eval(repr(f)) == f`` true for any float f.  The ``str()``
-function prints fewer digits and this often results in the more sensible number
-that was probably intended::
+    1.0011001100110011001100110011001100110011001100110011 (binary)
 
-   >>> 1.1 - 0.9
-   0.20000000000000007
-   >>> print(1.1 - 0.9)
-   0.2
+which is exactly::
 
-One of the consequences of this is that it is error-prone to compare the result
-of some computation to a float with ``==``. Tiny inaccuracies may mean that
-``==`` fails.  Instead, you have to check that the difference between the two
-numbers is less than a certain threshold::
+    1.1999999999999999555910790149937383830547332763671875 (decimal)
 
-   epsilon = 0.0000000000001  # Tiny allowed error
-   expected_result = 0.4
+The typical precision of 53 bits provides Python floats with 15-16
+decimal digits of accuracy.
 
-   if expected_result-epsilon <= computation() <= expected_result+epsilon:
-       ...
-
-Please see the chapter on :ref:`floating point arithmetic <tut-fp-issues>` in
-the Python tutorial for more information.
+For a fuller explanation, please see the :ref:`floating point arithmetic
+<tut-fp-issues>` chapter in the Python tutorial.
 
 
 Why are Python strings immutable?
@@ -225,7 +214,7 @@ The major reason is history. Functions were used for those operations that were
 generic for a group of types and which were intended to work even for objects
 that didn't have methods at all (e.g. tuples).  It is also convenient to have a
 function that can readily be applied to an amorphous collection of objects when
-you use the functional features of Python (``map()``, ``apply()`` et al).
+you use the functional features of Python (``map()``, ``zip()`` et al).
 
 In fact, implementing ``len()``, ``max()``, ``min()`` as a built-in function is
 actually less code than implementing them as methods for each type.  One can
@@ -284,8 +273,9 @@ Similar methods exist for bytes and bytearray objects.
 How fast are exceptions?
 ------------------------
 
-A try/except block is extremely efficient.  Actually catching an exception is
-expensive.  In versions of Python prior to 2.0 it was common to use this idiom::
+A try/except block is extremely efficient if no exceptions are raised.  Actually
+catching an exception is expensive.  In versions of Python prior to 2.0 it was
+common to use this idiom::
 
    try:
        value = mydict[key]
@@ -296,11 +286,10 @@ expensive.  In versions of Python prior to 2.0 it was common to use this idiom::
 This only made sense when you expected the dict to have the key almost all the
 time.  If that wasn't the case, you coded it like this::
 
-   if mydict.has_key(key):
+   if key in mydict:
        value = mydict[key]
    else:
-       mydict[key] = getvalue(key)
-       value = mydict[key]
+       value = mydict[key] = getvalue(key)
 
 For this specific case, you could also use ``value = dict.setdefault(key,
 getvalue(key))``, but only if the ``getvalue()`` call is cheap enough because it
@@ -356,9 +345,6 @@ support for C.
 
 Answer 2: Fortunately, there is `Stackless Python <http://www.stackless.com>`_,
 which has a completely redesigned interpreter loop that avoids the C stack.
-It's still experimental but looks very promising.  Although it is binary
-compatible with standard Python, it's still unclear whether Stackless will make
-it into the core -- maybe it's just too revolutionary.
 
 
 Why can't lambda forms contain statements?
@@ -718,7 +704,7 @@ of each call to the function, and return the cached value if the same value is
 requested again.  This is called "memoizing", and can be implemented like this::
 
    # Callers will never provide a third parameter for this function.
-   def expensive (arg1, arg2, _cache={}):
+   def expensive(arg1, arg2, _cache={}):
        if (arg1, arg2) in _cache:
            return _cache[(arg1, arg2)]
 
@@ -739,11 +725,11 @@ function calls.  Many feel that exceptions can conveniently emulate all
 reasonable uses of the "go" or "goto" constructs of C, Fortran, and other
 languages.  For example::
 
-   class label: pass  # declare a label
+   class label(Exception): pass  # declare a label
 
    try:
         ...
-        if (condition): raise label()  # goto label
+        if condition: raise label()  # goto label
         ...
    except label:  # where to goto
         pass

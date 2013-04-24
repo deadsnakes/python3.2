@@ -181,7 +181,7 @@ We can obtain the same result with::
 
    squares = [x**2 for x in range(10)]
 
-This is also equivalent to ``squares = map(lambda x: x**2, range(10))``,
+This is also equivalent to ``squares = list(map(lambda x: x**2, range(10)))``,
 but it's more concise and readable.
 
 A list comprehension consists of brackets containing an expression followed
@@ -292,7 +292,7 @@ which, in turn, is the same as::
 In the real world, you should prefer built-in functions to complex flow statements.
 The :func:`zip` function would do a great job for this use case::
 
-   >>> zip(*matrix)
+   >>> list(zip(*matrix))
    [(1, 5, 9), (2, 6, 10), (3, 7, 11), (4, 8, 12)]
 
 See :ref:`tut-unpacking-arguments` for details on the asterisk in this line.
@@ -349,17 +349,31 @@ A tuple consists of a number of values separated by commas, for instance::
    ... u = t, (1, 2, 3, 4, 5)
    >>> u
    ((12345, 54321, 'hello!'), (1, 2, 3, 4, 5))
+   >>> # Tuples are immutable:
+   ... t[0] = 88888
+   Traceback (most recent call last):
+     File "<stdin>", line 1, in <module>
+   TypeError: 'tuple' object does not support item assignment
+   >>> # but they can contain mutable objects:
+   ... v = ([1, 2, 3], [3, 2, 1])
+   >>> v
+   ([1, 2, 3], [3, 2, 1])
+
 
 As you see, on output tuples are always enclosed in parentheses, so that nested
 tuples are interpreted correctly; they may be input with or without surrounding
 parentheses, although often parentheses are necessary anyway (if the tuple is
-part of a larger expression).
+part of a larger expression).  It is not possible to assign to the individual
+items of a tuple, however it is possible to create tuples which contain mutable
+objects, such as lists.
 
-Tuples have many uses.  For example: (x, y) coordinate pairs, employee records
-from a database, etc.  Tuples, like strings, are immutable: it is not possible
-to assign to the individual items of a tuple (you can simulate much of the same
-effect with slicing and concatenation, though).  It is also possible to create
-tuples which contain mutable objects, such as lists.
+Though tuples may seem similar to lists, they are often used in different
+situations and for different purposes.
+Tuples are :term:`immutable`, and usually contain an heterogeneous sequence of
+elements that are accessed via unpacking (see later in this section) or indexing
+(or even by attribute in the case of :func:`namedtuples <collections.namedtuple>`).
+Lists are :term:`mutable`, and their elements are usually homogeneous and are
+accessed by iterating over the list.
 
 A special problem is the construction of tuples containing 0 or 1 items: the
 syntax has some extra quirks to accommodate these.  Empty tuples are constructed
@@ -388,8 +402,6 @@ many variables on the left side of the equals sign as there are elements in the
 sequence.  Note that multiple assignment is really just a combination of tuple
 packing and sequence unpacking.
 
-.. XXX Add a bit on the difference between tuples and lists.
-
 
 .. _tut-sets:
 
@@ -401,7 +413,7 @@ with no duplicate elements.  Basic uses include membership testing and
 eliminating duplicate entries.  Set objects also support mathematical operations
 like union, intersection, difference, and symmetric difference.
 
-Curly braces or the :func:`set` function can be used to create sets.  Note: To
+Curly braces or the :func:`set` function can be used to create sets.  Note: to
 create an empty set you have to use ``set()``, not ``{}``; the latter creates an
 empty dictionary, a data structure that we discuss in the next section.
 
@@ -430,12 +442,12 @@ Here is a brief demonstration::
    >>> a ^ b                              # letters in a or b but not both
    {'r', 'd', 'b', 'm', 'z', 'l'}
 
-Like :ref:`for lists <tut-listcomps>`, there is a set comprehension syntax::
+Similarly to :ref:`list comprehensions <tut-listcomps>`, set comprehensions
+are also supported::
 
    >>> a = {x for x in 'abracadabra' if x not in 'abc'}
    >>> a
    {'r', 'd'}
-
 
 
 .. _tut-dictionaries:
@@ -571,6 +583,19 @@ returns a new sorted list while leaving the source unaltered. ::
    banana
    orange
    pear
+
+To change a sequence you are iterating over while inside the loop (for
+example to duplicate certain items), it is recommended that you first make
+a copy.  Looping over a sequence does not implicitly make a copy.  The slice
+notation makes this especially convenient::
+
+   >>> words = ['cat', 'window', 'defenestrate']
+   >>> for w in words[:]:  # Loop over a slice copy of the entire list.
+   ...     if len(w) > 6:
+   ...         words.insert(0, w)
+   ...
+   >>> words
+   ['defenestrate', 'cat', 'window', 'defenestrate']
 
 
 .. _tut-conditions:

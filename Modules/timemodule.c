@@ -63,7 +63,7 @@ static int floatsleep(double);
 static double floattime(void);
 
 /* For Y2K check */
-static PyObject *moddict;
+static PyObject *moddict = NULL;
 
 static PyObject *
 time_time(PyObject *self, PyObject *unused)
@@ -504,7 +504,7 @@ time_strftime(PyObject *self, PyObject *args)
     fmt = PyBytes_AS_STRING(format);
 #endif
 
-#if defined(MS_WINDOWS)
+#if defined(MS_WINDOWS) && !defined(HAVE_WCSFTIME)
     /* check that the format string contains only valid directives */
     for(outbuf = strchr(fmt, '%');
         outbuf != NULL;
@@ -516,7 +516,8 @@ time_strftime(PyObject *self, PyObject *args)
             !strchr("aAbBcdHIjmMpSUwWxXyYzZ%", outbuf[1]))
         {
             PyErr_SetString(PyExc_ValueError, "Invalid format string");
-            return 0;
+            Py_DECREF(format);
+            return NULL;
         }
     }
 #endif
@@ -940,6 +941,11 @@ PyInit_time(void)
     /* Accept 2-digit dates unless PYTHONY2K is set and non-empty */
     p = Py_GETENV("PYTHONY2K");
     PyModule_AddIntConstant(m, "accept2dyear", (long) (!p || !*p));
+    /* If an embedded interpreter is shutdown and reinitialized the old
+       moddict was not decrefed on shutdown and the next import of this
+       module leads to a leak.  Conditionally decref here to prevent that.
+    */
+    Py_XDECREF(moddict);
     /* Squirrel away the module's dictionary for the y2k check */
     moddict = PyModule_GetDict(m);
     Py_INCREF(moddict);
