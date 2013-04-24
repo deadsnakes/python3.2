@@ -123,6 +123,7 @@ excluded_imports = {
     'platform': set(('plistlib', 'tempfile')),
     #'socket': set(('_ssl',)),
     'subprocess': set(('threading',)),
+    'sysconfig': set(('_osx_support',)),
     }
 
 def main(argv):
