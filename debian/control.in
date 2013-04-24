@@ -82,6 +82,8 @@ Package: idle-@PVER@
 Architecture: all
 Depends: @PVER@, @PVER@-tk, ${misc:Depends}
 Enhances: @PVER@
+Breaks: @PVER@ (<< 3.2.4-1)
+Replaces: @PVER@ (<< 3.2.4-1)
 XB-Python-Version: @VER@
 Description: IDE for Python (version @VER@) using Tkinter
  IDLE is an Integrated Development Environment for Python (version @VER@).

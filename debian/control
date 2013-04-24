@@ -82,6 +82,8 @@ Package: idle-python3.2
 Architecture: all
 Depends: python3.2, python3.2-tk, ${misc:Depends}
 Enhances: python3.2
+Breaks: python3.2 (<< 3.2.4-1)
+Replaces: python3.2 (<< 3.2.4-1)
 XB-Python-Version: 3.2
 Description: IDE for Python (version 3.2) using Tkinter
  IDLE is an Integrated Development Environment for Python (version 3.2).
