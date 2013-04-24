@@ -4,7 +4,7 @@
 
 --- a/Doc/install/index.rst
 +++ b/Doc/install/index.rst
-@@ -240,6 +240,8 @@
+@@ -238,6 +238,8 @@
  +-----------------+-----------------------------------------------------+--------------------------------------------------+-------+
  | Platform        | Standard installation location                      | Default value                                    | Notes |
  +=================+=====================================================+==================================================+=======+
@@ -13,7 +13,7 @@
  | Unix (pure)     | :file:`{prefix}/lib/python{X.Y}/site-packages`      | :file:`/usr/local/lib/python{X.Y}/site-packages` | \(1)  |
  +-----------------+-----------------------------------------------------+--------------------------------------------------+-------+
  | Unix (non-pure) | :file:`{exec-prefix}/lib/python{X.Y}/site-packages` | :file:`/usr/local/lib/python{X.Y}/site-packages` | \(1)  |
-@@ -249,6 +251,17 @@
+@@ -247,6 +249,17 @@
  
  Notes:
  
@@ -31,7 +31,7 @@
  (1)
     Most Linux distributions include Python as a standard part of the system, so
     :file:`{prefix}` and :file:`{exec-prefix}` are usually both :file:`/usr` on
-@@ -432,6 +445,15 @@
+@@ -430,6 +443,15 @@
  
     /usr/bin/python setup.py install --prefix=/usr/local
  
@@ -47,7 +47,7 @@
  Another possibility is a network filesystem where the name used to write to a
  remote directory is different from the name used to read it: for example, the
  Python interpreter accessed as :file:`/usr/local/bin/python` might search for
-@@ -683,6 +705,17 @@
+@@ -681,6 +703,17 @@
  import them, this directory must be added to ``sys.path``.  There are several
  different ways to add the directory.
  

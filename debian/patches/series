@@ -17,7 +17,6 @@ doc-nodownload.diff
 doc-build.diff
 profiled-build.diff
 makesetup-bashism.diff
-hurd-broken-poll.diff
 hurd-disable-nonworking-constants.diff
 enable-fpectl.diff
 statvfs-f_flag-constants.diff
