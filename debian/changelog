@@ -1,5 +1,6 @@
-python3.2 (3.2.3-2+lucid1) lucid; urgency=low
+python3.2 (3.2.4-1+lucid1) lucid; urgency=low
 
+  * Imported new upstream release Python 3.2.4.
   * Guarantee ctypes is built against system libffi.
   * Fix installation locations of some debug files.
   * Have -complete not depend on -minimal.
