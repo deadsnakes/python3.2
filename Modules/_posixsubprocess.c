@@ -175,8 +175,15 @@ _close_fds_by_brute_force(int start_fd, int end_fd, PyObject *py_fds_to_keep)
  * chooses to break compatibility with all existing binaries.  Highly Unlikely.
  */
 struct linux_dirent {
+#if defined(__x86_64__) && defined(__ILP32__)
+   /* Support the wacky x32 ABI (fake 32-bit userspace speaking to x86_64
+    * kernel interfaces) - https://sites.google.com/site/x32abi/ */
+   unsigned long long d_ino;
+   unsigned long long d_off;
+#else
    unsigned long  d_ino;        /* Inode number */
    unsigned long  d_off;        /* Offset to next linux_dirent */
+#endif
    unsigned short d_reclen;     /* Length of this linux_dirent */
    char           d_name[256];  /* Filename (null-terminated) */
 };
@@ -202,7 +209,18 @@ _close_open_fd_range_safe(int start_fd, int end_fd, PyObject* py_fds_to_keep)
     int fd_dir_fd;
     if (start_fd >= end_fd)
         return;
-        fd_dir_fd = open(FD_DIR, O_RDONLY | O_CLOEXEC, 0);
+#ifdef O_CLOEXEC
+    fd_dir_fd = open(FD_DIR, O_RDONLY | O_CLOEXEC, 0);
+#else
+    fd_dir_fd = open(FD_DIR, O_RDONLY, 0);
+#ifdef FD_CLOEXEC
+    {
+        int old = fcntl(fd_dir_fd, F_GETFD);
+        if (old != -1)
+            fcntl(fd_dir_fd, F_SETFD, old | FD_CLOEXEC);
+    }
+#endif
+#endif
     if (fd_dir_fd == -1) {
         /* No way to get a list of open fds. */
         _close_fds_by_brute_force(start_fd, end_fd, py_fds_to_keep);
@@ -336,7 +354,7 @@ child_exec(char *const exec_array[],
            PyObject *preexec_fn,
            PyObject *preexec_fn_args_tuple)
 {
-    int i, saved_errno, unused;
+    int i, saved_errno, unused, reached_preexec = 0;
     PyObject *result;
     const char* err_msg = "";
     /* Buffer large enough to hold a hex integer.  We can't malloc. */
@@ -420,6 +438,7 @@ child_exec(char *const exec_array[],
         POSIX_CALL(setsid());
 #endif
 
+    reached_preexec = 1;
     if (preexec_fn != Py_None && preexec_fn_args_tuple) {
         /* This is where the user has asked us to deadlock their program. */
         result = PyObject_Call(preexec_fn, preexec_fn_args_tuple, NULL);
@@ -469,6 +488,10 @@ error:
         }
         unused = write(errpipe_write, cur, hex_errno + sizeof(hex_errno) - cur);
         unused = write(errpipe_write, ":", 1);
+        if (!reached_preexec) {
+            /* Indicate to the parent that the error happened before exec(). */
+            unused = write(errpipe_write, "noexec", 6);
+        }
         /* We can't call strerror(saved_errno).  It is not async signal safe.
          * The parent process will look the error message up. */
     } else {
@@ -507,6 +530,8 @@ subprocess_fork_exec(PyObject* self, PyObject *args)
         return NULL;
 
     close_fds = PyObject_IsTrue(py_close_fds);
+    if (close_fds < 0)
+        return NULL;
     if (close_fds && errpipe_write < 3) {  /* precondition */
         PyErr_SetString(PyExc_ValueError, "errpipe_write must be >= 3");
         return NULL;
@@ -546,8 +571,10 @@ subprocess_fork_exec(PyObject* self, PyObject *args)
     }
 
     exec_array = _PySequence_BytesToCharpArray(executable_list);
-    if (!exec_array)
+    if (!exec_array) {
+        Py_XDECREF(gc_module);
         return NULL;
+    }
 
     /* Convert args and env into appropriate arguments for exec() */
     /* These conversions are done in the parent process to avoid allocating
@@ -557,6 +584,8 @@ subprocess_fork_exec(PyObject* self, PyObject *args)
         /* Equivalent to:  */
         /*  tuple(PyUnicode_FSConverter(arg) for arg in process_args)  */
         fast_args = PySequence_Fast(process_args, "argv must be a tuple");
+        if (fast_args == NULL)
+            goto cleanup;
         num_args = PySequence_Fast_GET_SIZE(fast_args);
         converted_args = PyTuple_New(num_args);
         if (converted_args == NULL)

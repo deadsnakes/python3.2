@@ -58,6 +58,7 @@ perform some operation on a file. ::
    int
    main(int argc, char *argv[])
    {
+     Py_SetProgramName(argv[0]);  /* optional but recommended */
      Py_Initialize();
      PyRun_SimpleString("from time import time,ctime\n"
                         "print('Today is', ctime(time()))\n");
@@ -65,9 +66,11 @@ perform some operation on a file. ::
      return 0;
    }
 
-The above code first initializes the Python interpreter with
+The :c:func:`Py_SetProgramName` function should be called before
+:c:func:`Py_Initialize` to inform the interpreter about paths to Python run-time
+libraries.  Next, the Python interpreter is initialized with
 :c:func:`Py_Initialize`, followed by the execution of a hard-coded Python script
-that print the date and time.  Afterwards, the :c:func:`Py_Finalize` call shuts
+that prints the date and time.  Afterwards, the :c:func:`Py_Finalize` call shuts
 the interpreter down, followed by the end of the program.  In a real program,
 you may want to get the Python script from another source, perhaps a text-editor
 routine, a file, or a database.  Getting the Python code from a file can better
@@ -135,7 +138,9 @@ This code loads a Python script using ``argv[1]``, and calls the function named
 in ``argv[2]``.  Its integer arguments are the other values of the ``argv``
 array.  If you :ref:`compile and link <compiling>` this program (let's call
 the finished executable :program:`call`), and use it to execute a Python
-script, such as::
+script, such as:
+
+.. code-block:: python
 
    def multiply(a,b):
        print("Will compute", a, "times", b)
@@ -155,13 +160,13 @@ for data conversion between Python and C, and for error reporting.  The
 interesting part with respect to embedding Python starts with ::
 
    Py_Initialize();
-   pName = PyString_FromString(argv[1]);
+   pName = PyUnicode_FromString(argv[1]);
    /* Error checking of pName left out */
    pModule = PyImport_Import(pName);
 
 After initializing the interpreter, the script is loaded using
 :c:func:`PyImport_Import`.  This routine needs a Python string as its argument,
-which is constructed using the :c:func:`PyString_FromString` data conversion
+which is constructed using the :c:func:`PyUnicode_FromString` data conversion
 routine. ::
 
    pFunc = PyObject_GetAttrString(pModule, argv[2]);
@@ -235,7 +240,9 @@ following two statements before the call to :c:func:`Py_Initialize`::
 
 These two lines initialize the ``numargs`` variable, and make the
 :func:`emb.numargs` function accessible to the embedded Python interpreter.
-With these extensions, the Python script can do things like ::
+With these extensions, the Python script can do things like
+
+.. code-block:: python
 
    import emb
    print("Number of arguments", emb.numargs())
@@ -300,7 +307,9 @@ examine Python's :file:`Makefile` (use :func:`sysconfig.get_makefile_filename`
 to find its location) and compilation
 options.  In this case, the :mod:`sysconfig` module is a useful tool to
 programmatically extract the configuration values that you will want to
-combine together::
+combine together:
+
+.. code-block:: python
 
    >>> import sysconfig
    >>> sysconfig.get_config_var('LINKFORSHARED')

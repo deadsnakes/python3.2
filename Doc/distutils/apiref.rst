@@ -48,7 +48,10 @@ setup script). Indirectly provides the  :class:`distutils.dist.Distribution` and
    +--------------------+--------------------------------+-------------------------------------------------------------+
    | *maintainer*       | The name of the current        | a string                                                    |
    |                    | maintainer, if different from  |                                                             |
-   |                    | the author                     |                                                             |
+   |                    | the author. Note that if       |                                                             |
+   |                    | the maintainer is provided,    |                                                             |
+   |                    | distutils will use it as the   |                                                             |
+   |                    | author in :file:`PKG-INFO`     |                                                             |
    +--------------------+--------------------------------+-------------------------------------------------------------+
    | *maintainer_email* | The email address of the       | a string                                                    |
    |                    | current maintainer, if         |                                                             |
@@ -992,6 +995,12 @@ directories.
    destination of the symlink will be copied.  *update* and *verbose* are the same
    as for :func:`copy_file`.
 
+   Files in *src* that begin with :file:`.nfs` are skipped (more information on
+   these files is available in answer D2 of the `NFS FAQ page
+   <http://nfs.sourceforge.net/#section_d>`_.
+
+   .. versionchanged:: 3.2.4
+      NFS files are ignored.
 
 .. function:: remove_tree(directory[, verbose=0, dry_run=0])
 

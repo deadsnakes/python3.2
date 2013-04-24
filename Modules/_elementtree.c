@@ -840,7 +840,7 @@ element_findtext(ElementObject* self, PyObject* args)
 
             PyObject* text = element_get_text(item);
             if (text == Py_None)
-                return PyBytes_FromString("");
+                return PyUnicode_FromString("");
             Py_XINCREF(text);
             return text;
         }
@@ -3114,8 +3114,13 @@ PyInit__elementtree(void)
             expat_capi->size < sizeof(struct PyExpat_CAPI) ||
             expat_capi->MAJOR_VERSION != XML_MAJOR_VERSION ||
             expat_capi->MINOR_VERSION != XML_MINOR_VERSION ||
-            expat_capi->MICRO_VERSION != XML_MICRO_VERSION)
-            expat_capi = NULL;
+            expat_capi->MICRO_VERSION != XML_MICRO_VERSION) {
+            PyErr_SetString(PyExc_ImportError,
+                            "pyexpat version is incompatible");
+            return NULL;
+        }
+    } else {
+        return NULL;
     }
 #endif
 

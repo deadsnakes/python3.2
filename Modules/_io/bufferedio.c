@@ -383,6 +383,17 @@ buffered_dealloc(buffered *self)
     Py_TYPE(self)->tp_free((PyObject *)self);
 }
 
+static PyObject *
+buffered_sizeof(buffered *self, void *unused)
+{
+    Py_ssize_t res;
+
+    res = sizeof(buffered);
+    if (self->buffer)
+        res += self->buffer_size;
+    return PyLong_FromSsize_t(res);
+}
+
 static int
 buffered_traverse(buffered *self, visitproc visit, void *arg)
 {
@@ -730,8 +741,8 @@ _buffered_init(buffered *self)
    clears the error indicator), 0 otherwise.
    Should only be called when PyErr_Occurred() is true.
 */
-static int
-_trap_eintr(void)
+int
+_PyIO_trap_eintr(void)
 {
     static PyObject *eintr_int = NULL;
     PyObject *typ, *val, *tb;
@@ -1314,7 +1325,7 @@ _bufferedreader_raw_read(buffered *self, char *start, Py_ssize_t len)
     */
     do {
         res = PyObject_CallMethodObjArgs(self->raw, _PyIO_str_readinto, memobj, NULL);
-    } while (res == NULL && _trap_eintr());
+    } while (res == NULL && _PyIO_trap_eintr());
     Py_DECREF(memobj);
     if (res == NULL)
         return -1;
@@ -1591,6 +1602,7 @@ static PyMethodDef bufferedreader_methods[] = {
     {"seek", (PyCFunction)buffered_seek, METH_VARARGS},
     {"tell", (PyCFunction)buffered_tell, METH_NOARGS},
     {"truncate", (PyCFunction)buffered_truncate, METH_VARARGS},
+    {"__sizeof__", (PyCFunction)buffered_sizeof, METH_NOARGS},
     {NULL, NULL}
 };
 
@@ -1690,7 +1702,7 @@ bufferedwriter_init(buffered *self, PyObject *args, PyObject *kwds)
     self->ok = 0;
     self->detached = 0;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O|nn:BufferedReader", kwlist,
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O|nn:BufferedWriter", kwlist,
                                      &raw, &buffer_size, &max_buffer_size)) {
         return -1;
     }
@@ -1742,7 +1754,7 @@ _bufferedwriter_raw_write(buffered *self, char *start, Py_ssize_t len)
         errno = 0;
         res = PyObject_CallMethodObjArgs(self->raw, _PyIO_str_write, memobj, NULL);
         errnum = errno;
-    } while (res == NULL && _trap_eintr());
+    } while (res == NULL && _PyIO_trap_eintr());
     Py_DECREF(memobj);
     if (res == NULL)
         return -1;
@@ -1985,6 +1997,7 @@ static PyMethodDef bufferedwriter_methods[] = {
     {"flush", (PyCFunction)buffered_flush, METH_NOARGS},
     {"seek", (PyCFunction)buffered_seek, METH_VARARGS},
     {"tell", (PyCFunction)buffered_tell, METH_NOARGS},
+    {"__sizeof__", (PyCFunction)buffered_sizeof, METH_NOARGS},
     {NULL, NULL}
 };
 
@@ -2326,7 +2339,7 @@ bufferedrandom_init(buffered *self, PyObject *args, PyObject *kwds)
     self->ok = 0;
     self->detached = 0;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O|nn:BufferedReader", kwlist,
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O|nn:BufferedRandom", kwlist,
                                      &raw, &buffer_size, &max_buffer_size)) {
         return -1;
     }
@@ -2384,6 +2397,7 @@ static PyMethodDef bufferedrandom_methods[] = {
     {"readline", (PyCFunction)buffered_readline, METH_VARARGS},
     {"peek", (PyCFunction)buffered_peek, METH_VARARGS},
     {"write", (PyCFunction)bufferedwriter_write, METH_VARARGS},
+    {"__sizeof__", (PyCFunction)buffered_sizeof, METH_NOARGS},
     {NULL, NULL}
 };
 
