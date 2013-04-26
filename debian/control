@@ -9,7 +9,8 @@ Build-Depends: debhelper (>= 7), autoconf,
    libncursesw5-dev (>= 5.3), tk8.5-dev, blt-dev (>= 2.4z), libgpm2 [!hurd-i386 !kfreebsd-i386 !kfreebsd-amd64],
    libbluetooth-dev [!hurd-i386 !kfreebsd-i386 !kfreebsd-amd64], locales [!armel !avr32 !hppa !ia64 !mipsel],
    libsqlite3-dev, libffi-dev (>= 3.0.5-2), libgdbm-dev,
-   gdb, python
+   gdb, python,
+   dpkg-dev (>= 1.16.1~)
 Build-Depends-Indep: python-sphinx (>= 1.0.7)
 Build-Conflicts: tcl8.4-dev, tk8.4-dev, tcl8.3-dev, tk8.3-dev, python3.2-xml, python-xml, autoconf2.13
 XS-Python-Version: 3.2
