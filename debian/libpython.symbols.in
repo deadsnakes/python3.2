@@ -1030,6 +1030,7 @@
  _PyIO_str_truncate@Base @VER@
  _PyIO_str_writable@Base @VER@
  _PyIO_str_write@Base @VER@
+ _PyIO_trap_eintr@Base 3.2.4
  _PyIO_zero@Base @VER@
  _PyImportHooks_Init@Base @VER@
  _PyImport_AcquireLock@Base @VER@
@@ -1049,6 +1050,7 @@
  _PyIncrementalNewlineDecoder_decode@Base @VER@
  _PyList_Extend@Base @VER@
  _PyLong_AsByteArray@Base @VER@
+ _PyLong_AsInt@Base 3.2.4
  _PyLong_Copy@Base @VER@
  _PyLong_DigitValue@Base @VER@
  _PyLong_DivmodNear@Base @VER@
@@ -1056,12 +1058,15 @@
  _PyLong_FormatAdvanced@Base @VER@
  _PyLong_Frexp@Base @VER@
  _PyLong_FromByteArray@Base @VER@
+ _PyLong_FromGid@Base 3.2.4
+ _PyLong_FromUid@Base 3.2.4
  _PyLong_Init@Base @VER@
  _PyLong_New@Base @VER@
  _PyLong_NumBits@Base @VER@
  _PyLong_Sign@Base @VER@
  _PyMethodWrapper_Type@Base @VER@
  _PyModule_Clear@Base @VER@
+ _PyNode_SizeOf@Base 3.2.4
  _PyNumber_ConvertIntegralToInt@Base @VER@
  _PyOS_GetOpt@Base @VER@
  _PyOS_ReadlineTState@Base @VER@
@@ -1111,6 +1116,8 @@
  _PyTrash_delete_nesting@Base @VER@
  _PyTrash_deposit_object@Base @VER@
  _PyTrash_destroy_chain@Base @VER@
+ _PyTrash_thread_deposit_object@Base 3.2.4
+ _PyTrash_thread_destroy_chain@Base 3.2.4
  _PyTuple_MaybeUntrack@Base @VER@
  _PyTuple_Resize@Base @VER@
  _PyType_CalculateMetaclass@Base @VER@
@@ -1188,6 +1195,7 @@
  _Py_FreeCharPArray@Base @VER@
  _Py_FunctionDef@Base @VER@
  _Py_GeneratorExp@Base @VER@
+ _Py_Gid_Converter@Base 3.2.4
  _Py_Global@Base @VER@
  _Py_HashDouble@Base @VER@
  _Py_HashPointer@Base @VER@
@@ -1228,6 +1236,7 @@
  _Py_TryExcept@Base @VER@
  _Py_TryFinally@Base @VER@
  _Py_Tuple@Base @VER@
+ _Py_Uid_Converter@Base 3.2.4
  _Py_UnaryOp@Base @VER@
  _Py_VaBuildValue_SizeT@Base @VER@
  _Py_While@Base @VER@
@@ -1301,6 +1310,7 @@
  _Py_meta_grammar@Base @VER@
  _Py_newbitset@Base @VER@
  _Py_newgrammar@Base @VER@
+ _Py_normalize_encoding@Base 3.2.4
  _Py_parse_inf_or_nan@Base @VER@
  _Py_pgen@Base @VER@
  _Py_samebitset@Base @VER@
