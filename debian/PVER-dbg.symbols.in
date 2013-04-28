@@ -1,8 +1,6 @@
 libpython@VER@@DEBUG_ABIFLAGS@.so.1.0 python@VER@-dbg #MINVER#
 #include "libpython.symbols"
  (arch=i386 lpia)_Py_force_double@Base @VER@
- (arch=i386 lpia)_Py_get_387controlword@Base @VER@
- (arch=i386 lpia)_Py_set_387controlword@Base @VER@
  _PyDict_Dummy@Base @VER@
  _PyMem_DebugFree@Base @VER@
  _PyMem_DebugMalloc@Base @VER@
