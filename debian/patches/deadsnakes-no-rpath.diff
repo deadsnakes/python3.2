@@ -1,6 +1,6 @@
 --- a/setup.py
 +++ b/setup.py
-@@ -1073,7 +1073,7 @@
+@@ -1071,7 +1071,7 @@
                                    include_dirs=["Modules/_sqlite",
                                                  sqlite_incdir],
                                    library_dirs=sqlite_libdir,
@@ -9,7 +9,7 @@
                                    extra_link_args=sqlite_extra_link_args,
                                    libraries=["sqlite3",]))
          else:
-@@ -1141,7 +1141,7 @@
+@@ -1139,7 +1139,7 @@
                          print("building dbm using bdb")
                          dbmext = Extension('_dbm', ['_dbmmodule.c'],
                                             library_dirs=dblib_dir,
