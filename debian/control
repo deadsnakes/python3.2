@@ -103,7 +103,7 @@ Description: Debug Build of the Python Interpreter (version 3.2)
 Package: python3.2-doc
 Section: doc
 Architecture: all
-Depends: ${misc:Depends}, libjs-jquery
+Depends: ${misc:Depends}, libjs-jquery, libjs-underscore
 Suggests: python3.2
 Description: Documentation for the high-level object-oriented language Python (version 3.2)
  This is the official set of documentation for the interactive high-level

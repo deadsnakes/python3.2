@@ -925,10 +925,13 @@ binary-indep: $(install_target) $(build_target) stamps/stamp-build-doc stamps/st
 		usr/share/doc/$(p_doc)
 	dh_installdocs -p$(p_doc)
 	cp -a Doc/build/html $(d_doc)/usr/share/doc/$(p_base)/
-	rm -f $(d_doc)/usr/share/doc/$(p_base)/html/_static/jquery.js
+	rm -f \
+		$(d_doc)/usr/share/doc/$(p_base)/html/_static/jquery.js \
+		$(d_doc)/usr/share/doc/$(p_base)/html/_static/underscore.js
 	dh_link -p$(p_doc) \
 		/usr/share/doc/$(p_base)/html /usr/share/doc/$(p_doc)/html \
-		/usr/share/javascript/jquery/jquery.js /usr/share/doc/$(p_base)/html/_static/jquery.js
+		/usr/share/javascript/jquery/jquery.js /usr/share/doc/$(p_base)/html/_static/jquery.js \
+		/usr/share/javascript/underscore/underscore.js /usr/share/doc/$(p_base)/html/_static/underscore.js
 
 	: # devhelp docs
 	python debian/pyhtml2devhelp.py \

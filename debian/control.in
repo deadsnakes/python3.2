@@ -103,7 +103,7 @@ Description: Debug Build of the Python Interpreter (version @VER@)
 Package: @PVER@-doc
 Section: doc
 Architecture: all
-Depends: ${misc:Depends}, libjs-jquery
+Depends: ${misc:Depends}, libjs-jquery, libjs-underscore
 Suggests: @PVER@
 Description: Documentation for the high-level object-oriented language Python (version @VER@)
  This is the official set of documentation for the interactive high-level
