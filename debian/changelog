@@ -1,6 +1,7 @@
 python3.2 (3.2.4-1+raring1) raring; urgency=low
 
   * Import from Lucid package.
+  * Use dpkg build flags.
 
  -- Felix Krull <f_krull@gmx.de>  Sun, 28 Apr 2013 19:11:26 +0200
 
