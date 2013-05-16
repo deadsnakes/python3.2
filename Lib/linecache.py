@@ -109,11 +109,6 @@ def updatecache(filename, module_globals=None):
         if os.path.isabs(filename):
             return []
 
-        # Take care to handle packages.
-        if basename == '__init__.py':
-            # filename referes to a package
-            basename = filename
-
         for dirname in sys.path:
             try:
                 fullname = os.path.join(dirname, basename)
