@@ -1,8 +1,9 @@
-python3.2 (3.2.4-2+raring1) UNRELEASED; urgency=low
+python3.2 (3.2.5-1+raring1) raring; urgency=low
 
+  * Imported new upstream release Python 3.2.5.
   * Remove unnecessary patches.
 
- -- Felix Krull <f_krull@gmx.de>  Tue, 30 Apr 2013 22:46:50 +0200
+ -- Felix Krull <f_krull@gmx.de>  Thu, 16 May 2013 13:28:20 +0200
 
 python3.2 (3.2.4-1+raring1) raring; urgency=low
 
