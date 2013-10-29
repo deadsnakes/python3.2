@@ -1,3 +1,10 @@
+python3.2 (3.2.5-2+raring1) raring; urgency=low
+
+  * Fix ncurses header detection. #6
+    - See also LP #1021783
+
+ -- Felix Krull <f_krull@gmx.de>  Tue, 29 Oct 2013 16:06:27 +0100
+
 python3.2 (3.2.5-1+raring1) raring; urgency=low
 
   * Imported new upstream release Python 3.2.5.
