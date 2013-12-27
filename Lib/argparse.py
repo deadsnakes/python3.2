@@ -90,10 +90,12 @@ import sys as _sys
 import textwrap as _textwrap
 
 try:
-    from gettext import gettext
+    from gettext import gettext, ngettext
 except ImportError:
     def gettext(message):
         return message
+    def ngettext(msg1, msg2, n):
+        return msg1 if n == 1 else msg2
 _ = gettext
 
 
