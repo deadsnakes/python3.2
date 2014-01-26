@@ -33,3 +33,4 @@ deadsnakes-ncursesw-include-dir.diff
 deadsnakes-libdb-versions.diff
 deadsnakes-assert-use-system-ffi.diff
 deadsnakes-no-rpath.diff
+deadsnakes-fix-sphinx1.2-docs-build.diff

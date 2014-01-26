@@ -12,7 +12,7 @@ sys.path.append(os.path.abspath('tools/sphinxext'))
 # General configuration
 # ---------------------
 
-extensions = ['refcounting', 'sphinx.ext.coverage',
+extensions = ['sphinx.ext.refcounting', 'sphinx.ext.coverage',
               'sphinx.ext.doctest', 'pyspecific']
 templates_path = ['tools/sphinxext']
 
