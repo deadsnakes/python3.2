@@ -905,7 +905,10 @@ endif
 	  case $$i in pyconfig.h) continue; esac; \
 	  ln -sf ../$(PVER)$(ABIFLAGS)/$$i $(d_dbg)/usr/include/$(PVER)$(DEBUG_ABIFLAGS)/$$i; \
 	done
-	cp -p $(buildd_debug)/pyconfig.h $(d_dbg)/usr/include/$(PVER)$(DEBUG_ABIFLAGS)/
+
+	: # Install pyconfig.h files from the shared builds.
+	cp -p $(buildd_shared)/pyconfig.h $(d_min)/usr/include/$(PVER)$(ABIFLAGS)/
+	cp -p $(buildd_shdebug)/pyconfig.h $(d_dbg)/usr/include/$(PVER)$(DEBUG_ABIFLAGS)/
 	ln -sf $(PVER).1.gz $(d_dbg)/usr/share/man/man1/$(PVER)-dbg.1.gz
 
 	: # symlinks for the "old" include / config directory names
