@@ -27,6 +27,8 @@ Priority: @PRIO@
 Depends: @PVER@-minimal (= ${binary:Version}), mime-support, ${shlibs:Depends}, ${misc:Depends}
 Suggests: @PVER@-doc, binutils
 Provides: python@VER@-cjkcodecs, python@VER@-ctypes, python@VER@-elementtree, python@VER@-celementtree, python@VER@-wsgiref, @PVER@-profiler
+Replaces: @PVER@-gdbm (<< 3.2.5-4)
+Breaks: @PVER@-gdbm (<< 3.2.5-4)
 XB-Python-Version: @VER@
 Description: Interactive high-level object-oriented language (version @VER@)
  Version @VER@ of the high-level, interactive object oriented language,

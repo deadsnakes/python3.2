@@ -27,6 +27,8 @@ Priority: optional
 Depends: python3.2-minimal (= ${binary:Version}), mime-support, ${shlibs:Depends}, ${misc:Depends}
 Suggests: python3.2-doc, binutils
 Provides: python3.2-cjkcodecs, python3.2-ctypes, python3.2-elementtree, python3.2-celementtree, python3.2-wsgiref, python3.2-profiler
+Replaces: python3.2-gdbm (<< 3.2.5-4)
+Breaks: python3.2-gdbm (<< 3.2.5-4)
 XB-Python-Version: 3.2
 Description: Interactive high-level object-oriented language (version 3.2)
  Version 3.2 of the high-level, interactive object oriented language,
