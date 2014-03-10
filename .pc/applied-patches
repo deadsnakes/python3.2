@@ -6,6 +6,7 @@ distutils-install-layout.diff
 locale-module.diff
 distutils-link.diff
 tkinter-import.diff
+gdbm-import.diff
 link-opt.diff
 webbrowser.diff
 linecache.diff
