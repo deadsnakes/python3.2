@@ -1,3 +1,12 @@
+python3.2 (3.2.5-4+saucy1) UNRELEASED; urgency=low
+
+  * Don't link extension modules to libpython on shared builds.
+  * Include pyconfig.h from shared build.
+  * The dbm.gnu module is now in the python3.2 package, similarly to how
+    tkinter is handled.
+
+ -- Felix Krull <f_krull@gmx.de>  Mon, 10 Mar 2014 17:11:49 +0100
+
 python3.2 (3.2.5-3+saucy1) saucy; urgency=low
 
   * Imported from Raring package.
