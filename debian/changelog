@@ -1,3 +1,9 @@
+python3.2 (3.2.5-4+trusty1) trusty; urgency=low
+
+  * Imported from Saucy package.
+
+ -- Felix Krull <f_krull@gmx.de>  Mon, 04 Aug 2014 17:32:18 +0200
+
 python3.2 (3.2.5-4+saucy1) saucy; urgency=low
 
   * Don't link extension modules to libpython on shared builds.
