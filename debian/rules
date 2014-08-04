@@ -544,7 +544,10 @@ endif
 generated-files: control-file
 	: # We have to prepare the various control files
 
-	for f in debian/*.in; do \
+	: # note: File names with spaces are explicitly not supported by this
+	: # target; since we're talking Debian packaging files here, this
+	: # should not be a big problem.
+	for f in `find debian -name \*.in`; do \
 	  f2=`echo $$f | sed "s,PVER,$(PVER),g;s/@VER@/$(VER)/g;s,\.in$$,,"`; \
 	  if [ $$f2 != debian/control ]; then \
 	    sed -e "s/@PVER@/$(PVER)/g;s/@VER@/$(VER)/g" \
@@ -574,7 +577,7 @@ clean: generated-files
 	rm -rf locales
 	rm -rf $(d)-dbg
 
-	for f in debian/*.in; do \
+	for f in `find debian -name \*.in`; do \
 	  f2=`echo $$f | sed "s,PVER,$(PVER),g;s/@VER@/$(VER)/g;s,\.in$$,,"`; \
 	  if [[ "$(PRESERVE_FILES)" != *"$$f2"* ]]; then \
 	    rm -f $$f2; \
@@ -737,11 +740,9 @@ endif
 ifeq ($(with_gdbm),yes)
 	: # Move GDBM files into $(p_gdbm)
 	dh_installdirs -p$(p_gdbm) \
-		usr/lib/python$(VER)/dbm \
 		usr/lib/python$(VER)/lib-dynload
 	DH_COMPAT=2 dh_movefiles -p$(p_gdbm) --sourcedir=$(d) \
-		usr/lib/python$(VER)/lib-dynload/_gdbm*.so \
-		usr/lib/python$(VER)/dbm/gnu.py
+		usr/lib/python$(VER)/lib-dynload/_gdbm*.so
 endif
 
 #	: # The test framework into $(p_base), regression tests dropped
@@ -905,7 +906,10 @@ endif
 	  case $$i in pyconfig.h) continue; esac; \
 	  ln -sf ../$(PVER)$(ABIFLAGS)/$$i $(d_dbg)/usr/include/$(PVER)$(DEBUG_ABIFLAGS)/$$i; \
 	done
-	cp -p $(buildd_debug)/pyconfig.h $(d_dbg)/usr/include/$(PVER)$(DEBUG_ABIFLAGS)/
+
+	: # Install pyconfig.h files from the shared builds.
+	cp -p $(buildd_shared)/pyconfig.h $(d_min)/usr/include/$(PVER)$(ABIFLAGS)/
+	cp -p $(buildd_shdebug)/pyconfig.h $(d_dbg)/usr/include/$(PVER)$(DEBUG_ABIFLAGS)/
 	ln -sf $(PVER).1.gz $(d_dbg)/usr/share/man/man1/$(PVER)-dbg.1.gz
 
 	: # symlinks for the "old" include / config directory names

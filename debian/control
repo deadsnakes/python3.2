@@ -14,7 +14,7 @@ Build-Depends: debhelper (>= 7), autoconf,
 Build-Depends-Indep: python-sphinx (>= 1.0.7)
 Build-Conflicts: tcl8.4-dev, tk8.4-dev, tcl8.3-dev, tk8.3-dev, python3.2-xml, python-xml, autoconf2.13
 XS-Python-Version: 3.2
-Standards-Version: 3.9.4
+Standards-Version: 3.9.5
 Homepage: http://python.org/
 Vcs-Browser: https://bitbucket.org/fk/deadsnakes-python3.2
 Vcs-Hg: https://bitbucket.org/fk/deadsnakes-python3.2
@@ -27,6 +27,8 @@ Priority: optional
 Depends: python3.2-minimal (= ${binary:Version}), mime-support, ${shlibs:Depends}, ${misc:Depends}
 Suggests: python3.2-doc, binutils
 Provides: python3.2-cjkcodecs, python3.2-ctypes, python3.2-elementtree, python3.2-celementtree, python3.2-wsgiref, python3.2-profiler
+Replaces: python3.2-gdbm (<< 3.2.5-4)
+Breaks: python3.2-gdbm (<< 3.2.5-4)
 XB-Python-Version: 3.2
 Description: Interactive high-level object-oriented language (version 3.2)
  Version 3.2 of the high-level, interactive object oriented language,

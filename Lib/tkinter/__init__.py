@@ -39,7 +39,7 @@ if sys.platform == "win32":
 try:
     import _tkinter
 except ImportError as msg:
-    raise ImportError(str(msg) + ', please install the python{}.{}-tk package'.format(*sys.version_info[:2]))
+    raise ImportError(str(msg) + ', please install the python%s.%s-tk package' % sys.version_info[:2])
 TclError = _tkinter.TclError
 from tkinter.constants import *
 import re
