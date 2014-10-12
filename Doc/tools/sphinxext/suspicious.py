@@ -47,12 +47,7 @@ import csv
 import sys
 
 from docutils import nodes
-
-try:
-    from sphinx.builders import Builder
-except ImportError:
-    from sphinx.builder import Builder
-
+from sphinx.builders import Builder
 
 detect_all = re.compile(r'''
     ::(?=[^=])|            # two :: (but NOT ::=)
