@@ -2040,7 +2040,10 @@ static PyTypeObject TreeBuilder_Type = {
 static struct PyExpat_CAPI* expat_capi;
 #define EXPAT(func) (expat_capi->func)
 #else
-#define EXPAT(func) (XML_##func)
+#define EXPAT(func) (PyExpat_XML_##func)
+#define PyExpat_XML_GetErrorLineNumber   PyExpat_XML_GetCurrentLineNumber
+#define PyExpat_XML_GetErrorColumnNumber PyExpat_XML_GetCurrentColumnNumber
+#define PyExpat_XML_GetErrorByteIndex    PyExpat_XML_GetCurrentByteIndex
 #endif
 
 typedef struct {
