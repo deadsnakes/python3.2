@@ -1,3 +1,9 @@
+python3.2 (3.2.6-1+trusty1) trusty; urgency=medium
+
+  * New upstream release Python 3.2.6.
+
+ -- Felix Krull <f_krull@gmx.de>  Sun, 12 Oct 2014 14:11:40 +0200
+
 python3.2 (3.2.5-4+trusty1) trusty; urgency=low
 
   * Imported from Saucy package.
