@@ -1,3 +1,9 @@
+python3.2 (3.2.6-1+utopic1) utopic; urgency=medium
+
+  * Imported from Trusty package.
+
+ -- Felix Krull <f_krull@gmx.de>  Sun, 12 Oct 2014 15:43:58 +0200
+
 python3.2 (3.2.6-1+trusty1) trusty; urgency=medium
 
   * New upstream release Python 3.2.6.
