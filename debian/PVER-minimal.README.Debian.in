@@ -15,12 +15,11 @@ are:
   _codecs		builtin
   _collections		extension
   _compat_pickle	module
-  _ctypes		extension
   _datetime		extension
   _elementtree		extension
   _fileio		builtin
   _functools		extension
-  _hashlib		extension
+  _hashlib		extensionx
   _heapq		extension
   _io			builtin
   _locale		extension
@@ -29,7 +28,7 @@ are:
   _random		extension
   _socket		extension
   _sre			builtin
-  _ssl			extension
+  _ssl			extensionx
   _stringio		extension
   _struct		extension
   _string		builtin
