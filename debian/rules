@@ -59,6 +59,9 @@ export PRIORITY=$(shell echo $(VER) | tr -d '.')0
 ABIFLAGS := mu
 DEBUG_ABIFLAGS := d$(ABIFLAGS)
 
+VER_MAJOR=$(shell echo $(VER) | sed -e s/[.][0-9]//)
+VER_MINOR=$(shell echo $(VER) | sed -e s/[0-9][.]//)
+
 PREVVER	:= $(shell awk '/^python/ && NR > 1 {print substr($$2,2,length($$2)-2); exit}' debian/changelog)
 
 # default versions are built from the python-defaults source package
@@ -68,7 +71,7 @@ STATIC_PYTHON=yes
 
 MIN_MODS := $(shell awk '/^  / && $$2 == "module" { print $$1 }' \
 		debian/PVER-minimal.README.Debian.in)
-MIN_EXTS := $(shell awk '/^  / && $$2 == "extension" { print $$1 }' \
+MIN_EXTS := $(shell awk '/^  / && $$2 ~ /^extension/ { print $$1 }' \
 		debian/PVER-minimal.README.Debian.in)
 MIN_BUILTINS := $(shell awk '/^  / && $$2 == "builtin" { print $$1 }' \
 		debian/PVER-minimal.README.Debian.in)
@@ -493,9 +496,8 @@ minimal-test:
 		mintest/lib/
 	cp -a $(foreach i,$(MIN_PACKAGES),Lib/$(i)) \
 		mintest/lib/
-	: # Don't install minimal extensions since those have been built statically.
-#	cp -p $(foreach i,$(MIN_EXTS),$(buildd_static)/build/lib*/$(i).so) \
-#		mintest/dynlib/
+	cp -p $(wildcard $(foreach i,$(MIN_EXTS),$(buildd_static)/build/lib*/$(i).*.so)) \
+		mintest/dynlib/
 	cp -p Lib/unittest.py mintest/lib/
 	cp -pr Lib/test mintest/lib/
 	cp -pr Lib mintest/all-lib
@@ -556,6 +558,8 @@ generated-files: control-file
 		    -e "s,@INFO@,$(info_docs),g" \
 		    -e "s/@ABIFLAGS@/$(ABIFLAGS)/g" \
 		    -e "s/@DEBUG_ABIFLAGS@/$(DEBUG_ABIFLAGS)/g" \
+		    -e "s/@VER_MAJOR@/$(VER_MAJOR)/g" \
+		    -e "s/@VER_MINOR@/$(VER_MINOR)/g" \
 		  <$$f >$$f2; \
 	  fi; \
 	done
@@ -676,7 +680,12 @@ endif
 		$(foreach i,$(MIN_PACKAGES),$(scriptdir)/$(i)) \
 		$(foreach i,$(MIN_ENCODINGS),$(scriptdir)/$(i)) \
 		$(scriptdir)/config-$(VER)$(ABIFLAGS)/Makefile \
-		$(scriptdir)/site.py
+		$(scriptdir)/site.py \
+		`cd $(d); for i in $(MIN_EXTS); do \
+			test -e $(scriptdir)/lib-dynload/$$i.*.so \
+			  && echo $(scriptdir)/lib-dynload/$$i.*.so; \
+		  done`
+	ls -l  $(d_min)/$(scriptdir)/lib-dynload/*.so
 
 	ln -sf python$(VER)$(ABIFLAGS) $(d_min)/usr/bin/python$(VER)
 	: # symlinks for the "old" config directory name

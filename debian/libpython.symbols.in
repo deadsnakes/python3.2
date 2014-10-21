@@ -56,20 +56,20 @@
  PyBytes_Repr@Base @VER@
  PyBytes_Size@Base @VER@
  PyBytes_Type@Base @VER@
- PyCArgObject_new@Base @VER@
- PyCArg_Type@Base @VER@
- PyCArrayType_Type@Base @VER@
- PyCArrayType_from_ctype@Base @VER@
- PyCArray_Type@Base @VER@
- PyCData_AtAddress@Base @VER@
- PyCData_FromBaseObj@Base @VER@
- PyCData_Type@Base @VER@
- PyCData_get@Base @VER@
- PyCData_set@Base @VER@
- PyCField_FromDesc@Base @VER@
- PyCField_Type@Base @VER@
- PyCFuncPtrType_Type@Base @VER@
- PyCFuncPtr_Type@Base @VER@
+ (optional)PyCArgObject_new@Base @VER@
+ (optional)PyCArg_Type@Base @VER@
+ (optional)PyCArrayType_Type@Base @VER@
+ (optional)PyCArrayType_from_ctype@Base @VER@
+ (optional)PyCArray_Type@Base @VER@
+ (optional)PyCData_AtAddress@Base @VER@
+ (optional)PyCData_FromBaseObj@Base @VER@
+ (optional)PyCData_Type@Base @VER@
+ (optional)PyCData_get@Base @VER@
+ (optional)PyCData_set@Base @VER@
+ (optional)PyCField_FromDesc@Base @VER@
+ (optional)PyCField_Type@Base @VER@
+ (optional)PyCFuncPtrType_Type@Base @VER@
+ (optional)PyCFuncPtr_Type@Base @VER@
  PyCFunction_Call@Base @VER@
  PyCFunction_ClearFreeList@Base @VER@
  PyCFunction_Fini@Base @VER@
@@ -79,14 +79,14 @@
  PyCFunction_New@Base @VER@
  PyCFunction_NewEx@Base @VER@
  PyCFunction_Type@Base @VER@
- PyCPointerType_Type@Base @VER@
- PyCPointer_Type@Base @VER@
- PyCSimpleType_Type@Base @VER@
- PyCStgDict_Type@Base @VER@
- PyCStgDict_clone@Base @VER@
- PyCStructType_Type@Base @VER@
- PyCStructUnionType_update_stgdict@Base @VER@
- PyCThunk_Type@Base @VER@
+ (optional)PyCPointerType_Type@Base @VER@
+ (optional)PyCPointer_Type@Base @VER@
+ (optional)PyCSimpleType_Type@Base @VER@
+ (optional)PyCStgDict_Type@Base @VER@
+ (optional)PyCStgDict_clone@Base @VER@
+ (optional)PyCStructType_Type@Base @VER@
+ (optional)PyCStructUnionType_update_stgdict@Base @VER@
+ (optional)PyCThunk_Type@Base @VER@
  PyCallIter_New@Base @VER@
  PyCallIter_Type@Base @VER@
  PyCallable_Check@Base @VER@
@@ -158,7 +158,7 @@
  PyDict_DelItemString@Base @VER@
  PyDict_Fini@Base @VER@
  PyDict_GetItem@Base @VER@
- PyDict_GetItemProxy@Base @VER@
+ (optional)PyDict_GetItemProxy@Base @VER@
  PyDict_GetItemString@Base @VER@
  PyDict_GetItemWithError@Base @VER@
  PyDict_Items@Base @VER@
@@ -168,7 +168,7 @@
  PyDict_New@Base @VER@
  PyDict_Next@Base @VER@
  PyDict_SetItem@Base @VER@
- PyDict_SetItemProxy@Base @VER@
+ (optional)PyDict_SetItemProxy@Base @VER@
  PyDict_SetItemString@Base @VER@
  PyDict_Size@Base @VER@
  PyDict_Type@Base @VER@
@@ -234,7 +234,7 @@
  PyEval_SetProfile@Base @VER@
  PyEval_SetTrace@Base @VER@
  PyEval_ThreadsInitialized@Base @VER@
- PyExc_ArgError@Base @VER@
+ (optional)PyExc_ArgError@Base @VER@
  PyExc_ArithmeticError@Base @VER@
  PyExc_AssertionError@Base @VER@
  PyExc_AttributeError@Base @VER@
@@ -582,7 +582,7 @@
  PyObject_Size@Base @VER@
  PyObject_Str@Base @VER@
  PyObject_Type@Base @VER@
- PyObject_stgdict@Base @VER@
+ (optional)PyObject_stgdict@Base @VER@
  PyParser_ASTFromFile@Base @VER@
  PyParser_ASTFromString@Base @VER@
  PyParser_AddToken@Base @VER@
@@ -754,7 +754,7 @@
  PyType_Modified@Base @VER@
  PyType_Ready@Base @VER@
  PyType_Type@Base @VER@
- PyType_stgdict@Base @VER@
+ (optional)PyType_stgdict@Base @VER@
  PyUnicodeDecodeError_Create@Base @VER@
  PyUnicodeDecodeError_GetEncoding@Base @VER@
  PyUnicodeDecodeError_GetEnd@Base @VER@
@@ -1331,81 +1331,8 @@
  asdl_int_seq_new@Base @VER@
  asdl_seq_new@Base @VER@
 
-# regexes don't work on Lucid.
-# (optional|regex)"^_ctypes_.*@Base$" @VER@
-# (optional|regex)"^ffi_type_.*@Base$" @VER@
-# (optional|regex)"^ffi_closure_.*@Base$" @VER@
- _ctypes_add_traceback@Base @VER@
- _ctypes_alloc_callback@Base @VER@
- _ctypes_alloc_format_string@Base @VER@
- _ctypes_callproc@Base @VER@
- _ctypes_extend_error@Base @VER@
- _ctypes_get_errobj@Base @VER@
- _ctypes_get_ffi_type@Base @VER@
- _ctypes_get_fielddesc@Base @VER@
- _ctypes_module_methods@Base @VER@
- _ctypes_ptrtype_cache@Base @VER@
- _ctypes_simple_instance@Base @VER@
- ffi_closure_alloc@Base @VER@
- ffi_closure_free@Base @VER@
- ffi_type_double@Base @VER@
- ffi_type_float@Base @VER@
- ffi_type_longdouble@Base @VER@
- ffi_type_pointer@Base @VER@
- ffi_type_sint16@Base @VER@
- ffi_type_sint32@Base @VER@
- ffi_type_sint64@Base @VER@
- ffi_type_sint8@Base @VER@
- ffi_type_uint16@Base @VER@
- ffi_type_uint32@Base @VER@
- ffi_type_uint64@Base @VER@
- ffi_type_uint8@Base @VER@
- ffi_type_void@Base @VER@
+ (optional|regex)"^_ctypes_.*@Base$" @VER@
+ (optional|regex)"^ffi_type_.*@Base$" @VER@
+ (optional|regex)"^ffi_closure_.*@Base$" @VER@
 
-# (optional|regex)"^PyInit_.*@Base$" @VER@
- PyInit__ast@Base @VER@
- PyInit__bisect@Base @VER@
- PyInit__codecs@Base @VER@
- PyInit__collections@Base @VER@
- PyInit__ctypes@Base @VER@
- PyInit__datetime@Base @VER@
- PyInit__elementtree@Base @VER@
- PyInit__functools@Base @VER@
- PyInit__hashlib@Base @VER@
- PyInit__heapq@Base @VER@
- PyInit__io@Base @VER@
- PyInit__locale@Base @VER@
- PyInit__pickle@Base @VER@
- PyInit__posixsubprocess@Base @VER@
- PyInit__random@Base @VER@
- PyInit__socket@Base @VER@
- PyInit__sre@Base @VER@
- PyInit__ssl@Base @VER@
- PyInit__string@Base @VER@
- PyInit__struct@Base @VER@
- PyInit__symtable@Base @VER@
- PyInit__thread@Base @VER@
- PyInit__weakref@Base @VER@
- PyInit_array@Base @VER@
- PyInit_atexit@Base @VER@
- PyInit_binascii@Base @VER@
- PyInit_errno@Base @VER@
- PyInit_fcntl@Base @VER@
- PyInit_gc@Base @VER@
- PyInit_grp@Base @VER@
- PyInit_imp@Base @VER@
- PyInit_itertools@Base @VER@
- PyInit_math@Base @VER@
- PyInit_operator@Base @VER@
- PyInit_posix@Base @VER@
- PyInit_pwd@Base @VER@
- PyInit_pyexpat@Base @VER@
- PyInit_select@Base @VER@
- PyInit_signal@Base @VER@
- PyInit_spwd@Base @VER@
- PyInit_syslog@Base @VER@
- PyInit_time@Base @VER@
- PyInit_unicodedata@Base @VER@
- PyInit_xxsubtype@Base @VER@
- PyInit_zipimport@Base @VER@
- PyInit_zlib@Base @VER@
+ (optional|regex)"^PyInit_.*@Base$" @VER@
