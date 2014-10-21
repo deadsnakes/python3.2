@@ -1,3 +1,11 @@
+python3.2 (3.2.6-2+trusty1) trusty; urgency=medium
+
+  * Fix readline module.
+  * Build ctypes as an extension.
+    - See issue #20.
+
+ -- Felix Krull <f_krull@gmx.de>  Tue, 21 Oct 2014 14:02:35 +0200
+
 python3.2 (3.2.6-1+trusty1) trusty; urgency=medium
 
   * New upstream release Python 3.2.6.
