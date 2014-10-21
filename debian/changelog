@@ -1,3 +1,9 @@
+python3.2 (3.2.6-2+utopic1) utopic; urgency=medium
+
+  * Imported from Trusty package.
+
+ -- Felix Krull <f_krull@gmx.de>  Tue, 21 Oct 2014 14:38:28 +0200
+
 python3.2 (3.2.6-2+trusty1) trusty; urgency=medium
 
   * Fix readline module.
