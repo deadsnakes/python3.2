@@ -14,7 +14,7 @@ Build-Depends: debhelper (>= 7), autoconf,
 Build-Depends-Indep: python-sphinx (>= 1.0.7)
 Build-Conflicts: tcl8.4-dev, tk8.4-dev, tcl8.3-dev, tk8.3-dev, python3.2-xml, python-xml, autoconf2.13
 XS-Python-Version: 3.2
-Standards-Version: 3.9.5
+Standards-Version: 3.9.6
 Homepage: http://python.org/
 Vcs-Browser: https://bitbucket.org/fk/deadsnakes-python3.2
 Vcs-Hg: https://bitbucket.org/fk/deadsnakes-python3.2
