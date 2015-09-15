@@ -1,3 +1,9 @@
+python3.2 (3.2.6-2+wily1) wily; urgency=medium
+
+  * Imported from Vivid package.
+
+ -- Felix Krull <f_krull@gmx.de>  Tue, 15 Sep 2015 16:19:35 +0200
+
 python3.2 (3.2.6-2+vivid1) vivid; urgency=medium
 
   * Imported from Trusty package.
