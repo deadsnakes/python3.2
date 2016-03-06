@@ -1,0 +1,11 @@
+# yes, we have to
+@PVER@ binary: depends-on-python-minimal
+
+@PVER@ binary: desktop-command-not-in-package
+@PVER@ binary: menu-command-not-in-package
+
+# license file referred by the standard library
+@PVER@ binary: extra-license-file
+
+@PVER@ binary: binary-without-manpage usr/bin/2to3-@VER@
+@PVER@ binary: hardening-no-fortify-functions usr/lib/@PVER@/lib-dynload/*

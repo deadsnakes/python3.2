@@ -1,0 +1,6 @@
+@PVER@-dbg binary: package-name-doesnt-match-sonames
+@PVER@-dbg binary: non-dev-pkg-with-shlib-symlink
+@PVER@-dbg binary: python-script-but-no-python-dep
+@PVER@-dbg binary: binary-without-manpage usr/bin/@PVER@*
+
+@PVER@-dbg binary: hardening-no-fortify-functions usr/lib/@PVER@/lib-dynload/*
