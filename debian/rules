@@ -671,7 +671,7 @@ endif
 		usr/share/man/man1 \
 		$(scriptdir)/lib-dynload \
 		$(scriptdir)/config-$(VER)$(ABIFLAGS)
-	DH_COMPAT=2 dh_movefiles -p$(p_min) --sourcedir=$(d) \
+	dh_movefiles -p$(p_min) --sourcedir=$(d) \
 		usr/bin/python$(VER) \
 		usr/bin/python$(VER)$(ABIFLAGS) \
 		usr/share/man/man1/python$(VER).1 \
@@ -719,7 +719,7 @@ endif
 		debian/test_results $(buildd_static)/pybench.log \
 	    $(d_dev)/usr/share/doc/python$(VER)/
 
-	DH_COMPAT=2 dh_movefiles -p$(p_dev) --sourcedir=$(d) \
+	dh_movefiles -p$(p_dev) --sourcedir=$(d) \
 		usr/lib/python$(VER)/config-$(VER)$(ABIFLAGS) \
 		usr/include/python$(VER)$(ABIFLAGS) \
 		usr/lib/libpython$(VER)$(ABIFLAGS).so \
@@ -742,7 +742,7 @@ ifeq ($(with_tk),yes)
 	dh_installdirs -p$(p_tk) \
 		$(scriptdir) \
 		usr/lib/python$(VER)/lib-dynload
-	DH_COMPAT=2 dh_movefiles -p$(p_tk) --sourcedir=$(d) \
+	dh_movefiles -p$(p_tk) --sourcedir=$(d) \
 		usr/lib/python$(VER)/lib-dynload/_tkinter*.so
 endif
 
@@ -750,12 +750,12 @@ ifeq ($(with_gdbm),yes)
 	: # Move GDBM files into $(p_gdbm)
 	dh_installdirs -p$(p_gdbm) \
 		usr/lib/python$(VER)/lib-dynload
-	DH_COMPAT=2 dh_movefiles -p$(p_gdbm) --sourcedir=$(d) \
+	dh_movefiles -p$(p_gdbm) --sourcedir=$(d) \
 		usr/lib/python$(VER)/lib-dynload/_gdbm*.so
 endif
 
 #	: # The test framework into $(p_base), regression tests dropped
-	DH_COMPAT=2 dh_movefiles -p$(p_base) --sourcedir=$(d) \
+	dh_movefiles -p$(p_base) --sourcedir=$(d) \
 		$(scriptdir)/test/{regrtest.py,support.py,__init__.py,pystone.py}
 	rm -rf $(d)/$(scriptdir)/test
 	rm -rf $(d)/$(scriptdir)/ctypes/test
@@ -778,7 +778,7 @@ endif
 		usr/bin \
 		usr/lib/$(PVER) \
 		usr/share/man/man1
-	DH_COMPAT=2 dh_movefiles -p$(p_idle) \
+	dh_movefiles -p$(p_idle) \
 		usr/bin/idle-python$(VER) \
 		usr/lib/$(PVER)/idlelib
 	cp -p debian/idle-$(PVER).1 $(d_idle)/usr/share/man/man1/
