@@ -1,1 +1,0 @@
-idle-@PVER@ binary: image-file-in-usr-lib usr/lib/@PVER@/idlelib/*

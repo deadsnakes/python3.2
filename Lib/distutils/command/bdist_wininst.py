@@ -342,10 +342,7 @@ class bdist_wininst(Command):
             sfix = ''
 
         filename = os.path.join(directory, "wininst-%.1f%s.exe" % (bv, sfix))
-        try:
-            f = open(filename, "rb")
-        except IOError as e:
-            raise DistutilsFileError(str(e) + ', please install the python%s-dev package' % sys.version[:3])
+        f = open(filename, "rb")
         try:
             return f.read()
         finally:
