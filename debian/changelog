@@ -1,3 +1,9 @@
+python3.2 (3.2.6-2+bionic1) bionic; urgency=medium
+
+  * Imported from Xenial package.
+
+ -- Anthony Sottile <asottile@umich.edu>  Thu, 26 Apr 2018 22:56:03 -0700
+
 python3.2 (3.2.6-2+xenial1) xenial; urgency=medium
 
   * Imported from Wily package.
