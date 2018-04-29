@@ -1,8 +1,9 @@
-python3.2 (3.2.6-2+bionic2) UNRELEASED; urgency=medium
+python3.2 (3.2.6-2+bionic2) bionic; urgency=medium
 
   * Bump Standards-Version.
+  * Use OpenSSL 1.0.1.
 
- -- Felix Krull <f_krull@gmx.de>  Sun, 29 Apr 2018 15:17:29 +0000
+ -- Felix Krull <f_krull@gmx.de>  Sun, 29 Apr 2018 15:18:31 +0000
 
 python3.2 (3.2.6-2+bionic1) bionic; urgency=medium
 
